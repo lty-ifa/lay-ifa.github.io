@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我適合哪種信託？自我評量測驗</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Serif TC', 'Georgia', serif;
+      background: #f5f0eb;
+      color: #2c2c2c;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      padding: 48px 40px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    }
+
+    /* === INTRO SCREEN === */
+    .intro h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+    }
+    .intro .subtitle {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    .trust-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    .badge {
+      background: #f0ece6;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 0.88rem;
+      color: #5a4a3a;
+      font-weight: 500;
+    }
+
+    /* === PROGRESS === */
+    .progress-bar-wrap {
+      height: 6px;
+      background: #eee;
+      border-radius: 10px;
+      margin-bottom: 36px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #c9a96e, #8b6914);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 0.82rem;
+      color: #999;
+      margin-bottom: 8px;
+      text-align: right;
+    }
+
+    /* === QUESTION === */
+    .question-number {
+      font-size: 0.82rem;
+      color: #c9a96e;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    /* === OPTIONS === */
+    .options { display: flex; flex-direction: column; gap: 14px; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #faf8f5;
+      border: 2px solid #e8e2da;
+      border-radius: 14px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option:hover {
+      border-color: #c9a96e;
+      background: #fdf8f0;
+    }
+    .option.selected {
+      border-color: #8b6914;
+      background: #fdf3dd;
+    }
+
+    /* multi-select hint */
+    .multi-hint {
+      font-size: 0.82rem;
+      color: #c9a96e;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .multi-hint::before {
+      content: '';
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid #c9a96e;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    /* checkmark indicator on multi-select */
+    .option .check-indicator {
+      width: 22px; height: 22px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      color: transparent;
+      transition: all 0.2s;
+      margin-top: 2px;
+    }
+    .option.selected .check-indicator {
+      background: #8b6914;
+      border-color: #8b6914;
+      color: #fff;
+    }
+    .option-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .option-content { flex: 1; }
+    .option-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+    .option-desc {
+      font-size: 0.85rem;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    /* === BUTTONS === */
+    .btn {
+      display: inline-block;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #c9a96e, #8b6914);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(139,105,20,0.3);
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled {
+      background: #ddd;
+      color: #aaa;
+      box-shadow: none;
+      transform: none;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #999;
+      border: 2px solid #e0e0e0;
+      margin-right: 12px;
+    }
+    .btn-secondary:hover { border-color: #bbb; color: #666; }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 36px;
+    }
+
+    /* === RESULT === */
+    .result-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .result-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+    .result-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    .result-subtitle { font-size: 0.95rem; color: #777; line-height: 1.6; }
+
+    .result-cards { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+    .result-card {
+      border-radius: 16px;
+      padding: 20px 24px;
+      border-left: 5px solid;
+    }
+    .result-card.primary { background: #fdf3dd; border-color: #c9a96e; }
+    .result-card.secondary { background: #f0f7ff; border-color: #6fa8dc; }
+    .result-card.tertiary { background: #f0fbf4; border-color: #6db57a; }
+
+    .result-card-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      color: #888;
+    }
+    .result-card-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+    .result-card-desc {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .score-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .score-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1s ease;
+    }
+    .score-pct { font-size: 0.82rem; color: #888; min-width: 36px; text-align: right; }
+
+    .result-cta {
+      text-align: center;
+      background: #f5f0eb;
+      border-radius: 14px;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .result-cta strong { color: #1a1a1a; }
+
+    .btn-restart {
+      display: block;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 480px) {
+      .container { padding: 32px 24px; }
+      .intro h1 { font-size: 1.5rem; }
+      .question-text { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="intro">
+    <h1>我適合哪種信託？</h1>
+    <p class="subtitle">
+      只需回答 8 個問題，幫助你了解自己的財務需求<br>
+      找到最適合的信託規劃方向。
+    </p>
+    <div class="trust-badges">
+      <span class="badge">安養信託</span>
+      <span class="badge">子女教育信託</span>
+      <span class="badge">遺囑信託</span>
+      <span class="badge">公益信託</span>
+      <span class="badge">保險金信託</span>
+      <span class="badge">不動產信託</span>
+      <span class="badge">特殊需求信託</span>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()">開始測驗</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress-label" id="progress-label">第 1 題，共 8 題</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+
+    <div class="question-number" id="q-number">Q1</div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+
+    <div class="action-row">
+      <button class="btn btn-secondary" id="btn-prev" onclick="prevQuestion()">上一題</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" disabled>下一題</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="hidden">
+    <div class="result-header">
+      <div class="result-emoji" id="result-emoji"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-subtitle" id="result-subtitle"></div>
+    </div>
+
+    <div class="result-cards" id="result-cards"></div>
+
+    <div class="result-cta">
+      <strong>這份結果僅供參考。</strong><br>
+      實際信託規劃依個人財務狀況量身規劃。<br><br>
+      <strong>IFA 獨立財務顧問｜Esther｜私人銀行 境內外信託 財富傳承 保本儲蓄</strong>
+    </div>
+
+    <button class="btn btn-primary btn-restart" onclick="restartQuiz()">重新測驗</button>
+  </div>
+
+</div>
+
+<script>
+  // multi: true = 複選題，multi: false = 單選題
+  // scores keys: elder=安養, edu=子女教育, will=遺囑, charity=公益, insure=保險金, realty=不動產, special=特殊需求
+  const questions = [
+    {
+      id: 'q1',
+      multi: false,
+      text: '您目前的年齡層是？',
+      options: [
+        { icon: '🌱', label: '30 歲以下', desc: '仍在累積財富階段',      scores: { elder: 0, edu: 1, will: 0, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '🌿', label: '31–50 歲',  desc: '事業發展、家庭成長期',   scores: { elder: 1, edu: 2, will: 1, charity: 1, insure: 2, realty: 1, special: 1 } },
+        { icon: '🌳', label: '51–65 歲',  desc: '財富高峰、開始規劃傳承', scores: { elder: 2, edu: 1, will: 2, charity: 2, insure: 2, realty: 2, special: 1 } },
+        { icon: '🍂', label: '65 歲以上', desc: '退休生活與資產保障',     scores: { elder: 3, edu: 0, will: 3, charity: 2, insure: 2, realty: 2, special: 2 } }
+      ]
+    },
+    {
+      id: 'q2',
+      multi: true,
+      text: '您對財富最擔心哪些事？（可複選）',
+      options: [
+        { icon: '🏥', label: '老後醫療與長照費用不夠',       desc: '擔心未來健康照護支出龐大',       scores: { elder: 3, edu: 0, will: 0, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '💸', label: '資產在我不能自主時被濫用',     desc: '擔心認知退化後財產被侵占',       scores: { elder: 3, edu: 0, will: 1, charity: 0, insure: 1, realty: 1, special: 2 } },
+        { icon: '👨‍👩‍👧', label: '子女或家人未來生活沒保障', desc: '希望給家人長期穩定的支撐',       scores: { elder: 1, edu: 3, will: 2, charity: 0, insure: 2, realty: 1, special: 2 } },
+        { icon: '⚔️', label: '身後家人為遺產發生爭執',       desc: '擔心繼承引發家庭糾紛',           scores: { elder: 0, edu: 0, will: 3, charity: 0, insure: 1, realty: 2, special: 0 } },
+        { icon: '📊', label: '遺產稅或贈與稅負擔過重',       desc: '稅務規劃不到位',                 scores: { elder: 1, edu: 1, will: 2, charity: 1, insure: 2, realty: 2, special: 0 } },
+        { icon: '🌍', label: '財富沒有發揮更大的意義',       desc: '希望資產能回饋社會',             scores: { elder: 0, edu: 0, will: 1, charity: 3, insure: 0, realty: 0, special: 0 } },
+        { icon: '🏠', label: '名下不動產不知道如何傳承',     desc: '房產分配複雜，擔心糾紛',         scores: { elder: 0, edu: 0, will: 2, charity: 0, insure: 0, realty: 3, special: 0 } },
+        { icon: '💔', label: '有家人需要長期特別照護',       desc: '身心障礙、罕見疾病或失能家人',   scores: { elder: 1, edu: 0, will: 1, charity: 0, insure: 1, realty: 0, special: 3 } }
+      ]
+    },
+    {
+      id: 'q3',
+      multi: false,
+      text: '您目前的家庭狀況是？',
+      options: [
+        { icon: '👤', label: '單身，無子女或依賴者',     desc: '',                             scores: { elder: 2, edu: 0, will: 1, charity: 2, insure: 1, realty: 1, special: 0 } },
+        { icon: '👶', label: '有未成年子女',             desc: '需規劃教育與成長費用',         scores: { elder: 0, edu: 3, will: 2, charity: 0, insure: 2, realty: 1, special: 1 } },
+        { icon: '🎓', label: '子女已成年但仍需支持',     desc: '如在學、創業或財務未獨立',     scores: { elder: 0, edu: 2, will: 2, charity: 0, insure: 1, realty: 1, special: 1 } },
+        { icon: '♿', label: '有需要長期照護的家人',     desc: '如身心障礙者或高齡父母',       scores: { elder: 2, edu: 1, will: 3, charity: 0, insure: 1, realty: 1, special: 3 } }
+      ]
+    },
+    {
+      id: 'q4',
+      multi: true,
+      text: '您希望信託能做到哪些事？（可複選）',
+      options: [
+        { icon: '🛡️', label: '保障我退休後的生活費與醫療費',       desc: '',                               scores: { elder: 3, edu: 0, will: 1, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '📚', label: '為孩子儲備教育基金，專款專用',       desc: '',                               scores: { elder: 0, edu: 3, will: 1, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '🎯', label: '按照我的意願分配身後財產',           desc: '指定繼承人、金額與條件',         scores: { elder: 0, edu: 1, will: 3, charity: 0, insure: 2, realty: 2, special: 0 } },
+        { icon: '🔒', label: '設定子女「達到條件」才能動用',       desc: '如成年、完成學業等',             scores: { elder: 0, edu: 2, will: 3, charity: 0, insure: 1, realty: 1, special: 0 } },
+        { icon: '🌱', label: '將部分財富用於公益捐款',             desc: '持續支持特定公益事業',           scores: { elder: 0, edu: 0, will: 1, charity: 3, insure: 0, realty: 0, special: 0 } },
+        { icon: '🏠', label: '妥善管理或傳承名下不動產',           desc: '房產不被低價拍賣或任意處分',     scores: { elder: 0, edu: 0, will: 1, charity: 0, insure: 0, realty: 3, special: 0 } },
+        { icon: '💝', label: '確保特殊需求家人終身有人照顧',       desc: '即使我不在，照護費用不中斷',     scores: { elder: 1, edu: 0, will: 2, charity: 0, insure: 1, realty: 0, special: 3 } },
+        { icon: '📋', label: '將保單理賠金交由信託管理',           desc: '避免理賠金一次性被花光',         scores: { elder: 1, edu: 1, will: 1, charity: 0, insure: 3, realty: 0, special: 1 } }
+      ]
+    },
+    {
+      id: 'q5',
+      multi: false,
+      text: '您目前的可投資資產規模大約是？',
+      options: [
+        { icon: '💰',     label: '500 萬以下',      desc: '', scores: { elder: 1, edu: 1, will: 0, charity: 0, insure: 1, realty: 0, special: 1 } },
+        { icon: '💰💰',   label: '500 萬－2,000 萬', desc: '', scores: { elder: 2, edu: 2, will: 1, charity: 1, insure: 2, realty: 1, special: 1 } },
+        { icon: '💰💰💰', label: '2,000 萬－1 億',   desc: '', scores: { elder: 2, edu: 2, will: 2, charity: 2, insure: 2, realty: 2, special: 1 } },
+        { icon: '🏦',     label: '1 億以上',         desc: '', scores: { elder: 2, edu: 2, will: 3, charity: 3, insure: 2, realty: 3, special: 1 } }
+      ]
+    },
+    {
+      id: 'q6',
+      multi: false,
+      text: '您幾歲希望開始享受信託帶來的保障？',
+      options: [
+        { icon: '🌿', label: '現在就開始',         desc: '趁早規劃，資產更有保障',     scores: { elder: 2, edu: 2, will: 1, charity: 1, insure: 2, realty: 2, special: 2 } },
+        { icon: '🌳', label: '55–65 歲退休前後',   desc: '即將進入退休規劃期',         scores: { elder: 3, edu: 1, will: 2, charity: 1, insure: 2, realty: 1, special: 1 } },
+        { icon: '📋', label: '身後才生效',         desc: '主要為傳承與分配',           scores: { elder: 0, edu: 1, will: 3, charity: 2, insure: 2, realty: 2, special: 1 } },
+        { icon: '🎓', label: '當孩子需要時才動用', desc: '依教育或成長里程碑啟動',     scores: { elder: 0, edu: 3, will: 1, charity: 0, insure: 1, realty: 0, special: 2 } }
+      ]
+    },
+    {
+      id: 'q7',
+      multi: true,
+      text: '以下哪些描述符合您目前的想法？（可複選）',
+      options: [
+        { icon: '💭', label: '我擔心老了之後沒有人照顧我',                 desc: '', scores: { elder: 3, edu: 0, will: 0, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '🏫', label: '我希望孩子的教育費用有保障',                 desc: '', scores: { elder: 0, edu: 3, will: 0, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '📜', label: '我想要自己決定財產怎麼分',                   desc: '', scores: { elder: 0, edu: 0, will: 3, charity: 0, insure: 1, realty: 1, special: 0 } },
+        { icon: '❤️', label: '我想在有生之年就做公益',                     desc: '', scores: { elder: 0, edu: 0, will: 0, charity: 3, insure: 0, realty: 0, special: 0 } },
+        { icon: '🔐', label: '我希望資產不會被家人提早花掉',               desc: '', scores: { elder: 2, edu: 1, will: 2, charity: 0, insure: 1, realty: 1, special: 1 } },
+        { icon: '🏠', label: '我有房產，希望身後能順利傳給下一代',         desc: '', scores: { elder: 0, edu: 0, will: 2, charity: 0, insure: 0, realty: 3, special: 0 } },
+        { icon: '💝', label: '我有家人需要特別照顧，我走後他們怎麼辦',     desc: '', scores: { elder: 1, edu: 0, will: 2, charity: 0, insure: 1, realty: 0, special: 3 } },
+        { icon: '📋', label: '我有一筆保單，想讓理賠金被好好管理',         desc: '', scores: { elder: 1, edu: 1, will: 1, charity: 0, insure: 3, realty: 0, special: 1 } }
+      ]
+    },
+    {
+      id: 'q8',
+      multi: false,
+      text: '對您來說，「財富」最重要的意義是？',
+      options: [
+        { icon: '🛏️', label: '晚年有尊嚴、有品質的生活', desc: '', scores: { elder: 3, edu: 0, will: 1, charity: 0, insure: 1, realty: 0, special: 0 } },
+        { icon: '🌱', label: '給下一代最好的起點',         desc: '', scores: { elder: 0, edu: 3, will: 1, charity: 0, insure: 1, realty: 0, special: 1 } },
+        { icon: '🏛️', label: '按照我的意志流傳下去',       desc: '', scores: { elder: 0, edu: 0, will: 3, charity: 1, insure: 1, realty: 2, special: 0 } },
+        { icon: '🌍', label: '為社會留下一份貢獻',         desc: '', scores: { elder: 0, edu: 0, will: 1, charity: 3, insure: 0, realty: 0, special: 0 } }
+      ]
+    }
+  ];
+
+  const trustInfo = {
+    elder: {
+      name: '安養信託',
+      emoji: '🛡️',
+      color: '#c9a96e',
+      barColor: '#c9a96e',
+      cardClass: 'primary',
+      desc: '為退休後的生活品質提供保障，將資產委託信託機構管理，按需支付醫療、生活及照護費用，防止資產在認知退化後被不當使用。'
+    },
+    edu: {
+      name: '子女教育信託',
+      emoji: '📚',
+      color: '#6fa8dc',
+      barColor: '#6fa8dc',
+      cardClass: 'secondary',
+      desc: '專為子女未來教育及成長費用設立，依設定條件（如達到特定年齡或學業里程碑）撥付資金，確保專款專用。'
+    },
+    will: {
+      name: '遺囑信託',
+      emoji: '🏛️',
+      color: '#8e44ad',
+      barColor: '#8e44ad',
+      cardClass: 'tertiary',
+      desc: '在遺囑中指定信託安排，身後由信託機構執行財產分配，可附加條件與時間規劃，有效避免家族爭產並實現傳承意志。'
+    },
+    charity: {
+      name: '公益信託',
+      emoji: '🌱',
+      color: '#6db57a',
+      barColor: '#6db57a',
+      cardClass: 'tertiary',
+      desc: '以部分財富設立公益目的信託，由信託機構持續運作公益事業，讓財富發揮長遠社會影響力，也可享有部分稅務優惠。'
+    },
+    insure: {
+      name: '保險金信託',
+      emoji: '📋',
+      color: '#e07b54',
+      barColor: '#e07b54',
+      cardClass: 'secondary',
+      desc: '將人壽保險的身故理賠金預先指定交付信託管理，避免鉅額理賠金一次性發放後被揮霍，可依設定條件分期給付受益人，是保障家人的雙重防護。'
+    },
+    realty: {
+      name: '不動產信託',
+      emoji: '🏠',
+      color: '#5b8db8',
+      barColor: '#5b8db8',
+      cardClass: 'secondary',
+      desc: '將房地產移轉至信託名下，由信託機構依委託人指示管理、出租或於特定條件下處分，有效避免房產在繼承時被低價拍賣或引發家族糾紛，也常用於預售屋價金保障。'
+    },
+    special: {
+      name: '特殊需求信託',
+      emoji: '💝',
+      color: '#9b6bb5',
+      barColor: '#9b6bb5',
+      cardClass: 'tertiary',
+      desc: '專為有身心障礙、罕見疾病或長期失能家人所設立，確保照護費用來源不中斷。即使委託人離世，信託機構仍依約持續支付受益人的生活與醫療開銷，給家人最長遠的安心。'
+    }
+  };
+
+  let currentQ = 0;
+  // answers: single -> number | undefined, multi -> Set of indices
+  let answers = {};
+
+  function startQuiz() {
+    document.getElementById('screen-intro').classList.add('hidden');
+    document.getElementById('screen-quiz').classList.remove('hidden');
+    renderQuestion();
+  }
+
+  function isAnswered(q) {
+    if (q.multi) {
+      return answers[q.id] instanceof Set && answers[q.id].size > 0;
+    }
+    return answers[q.id] !== undefined;
+  }
+
+  function renderQuestion() {
+    const q = questions[currentQ];
+    const total = questions.length;
+
+    document.getElementById('progress-label').textContent = `第 ${currentQ + 1} 題，共 ${total} 題`;
+    document.getElementById('progress-bar').style.width = `${((currentQ) / total) * 100}%`;
+    document.getElementById('q-number').textContent = `Q${currentQ + 1}`;
+    document.getElementById('q-text').textContent = q.text;
+
+    const container = document.getElementById('q-options');
+    container.innerHTML = '';
+
+    // hint for multi-select
+    if (q.multi) {
+      const hint = document.createElement('div');
+      hint.className = 'multi-hint';
+      hint.textContent = '可選擇多個選項';
+      container.appendChild(hint);
+    }
+
+    const selectedSet = q.multi
+      ? (answers[q.id] instanceof Set ? answers[q.id] : new Set())
+      : null;
+
+    q.options.forEach((opt, idx) => {
+      const isSelected = q.multi ? selectedSet.has(idx) : answers[q.id] === idx;
+      const div = document.createElement('div');
+      div.className = 'option' + (isSelected ? ' selected' : '');
+      div.innerHTML = `
+        <div class="option-icon">${opt.icon}</div>
+        <div class="option-content">
+          <div class="option-label">${opt.label}</div>
+          ${opt.desc ? `<div class="option-desc">${opt.desc}</div>` : ''}
+        </div>
+        ${q.multi ? '<div class="check-indicator">&#10003;</div>' : ''}
+      `;
+      div.dataset.idx = idx;
+      div.onclick = () => selectOption(idx);
+      container.appendChild(div);
+    });
+
+    document.getElementById('btn-prev').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-next').textContent = currentQ === total - 1 ? '查看結果' : '下一題';
+    document.getElementById('btn-next').disabled = !isAnswered(q);
+  }
+
+  function selectOption(idx) {
+    const q = questions[currentQ];
+
+    if (q.multi) {
+      if (!(answers[q.id] instanceof Set)) answers[q.id] = new Set();
+      if (answers[q.id].has(idx)) {
+        answers[q.id].delete(idx);
+      } else {
+        answers[q.id].add(idx);
+      }
+      document.querySelectorAll('.option').forEach(el => {
+        el.classList.toggle('selected', answers[q.id].has(Number(el.dataset.idx)));
+      });
+    } else {
+      answers[q.id] = idx;
+      document.querySelectorAll('.option').forEach(el => {
+        el.classList.toggle('selected', Number(el.dataset.idx) === idx);
+      });
+    }
+
+    document.getElementById('btn-next').disabled = !isAnswered(q);
+  }
+
+  function nextQuestion() {
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function prevQuestion() {
+    if (currentQ > 0) {
+      currentQ--;
+      renderQuestion();
+    }
+  }
+
+  function showResult() {
+    const scores = { elder: 0, edu: 0, will: 0, charity: 0 };
+
+    questions.forEach(q => {
+      if (q.multi) {
+        const sel = answers[q.id];
+        if (sel instanceof Set) {
+          sel.forEach(idx => {
+            const s = q.options[idx].scores;
+            for (const key in s) scores[key] += s[key];
+          });
+        }
+      } else {
+        const selectedIdx = answers[q.id];
+        if (selectedIdx !== undefined) {
+          const s = q.options[selectedIdx].scores;
+          for (const key in s) scores[key] += s[key];
+        }
+      }
+    });
+
+    const maxScore = Math.max(...Object.values(scores));
+    const sorted = Object.entries(scores)
+      .sort((a, b) => b[1] - a[1]);
+
+    const top = sorted[0][0];
+    const info = trustInfo[top];
+
+    document.getElementById('screen-quiz').classList.add('hidden');
+    document.getElementById('screen-result').classList.remove('hidden');
+
+    document.getElementById('result-emoji').textContent = info.emoji;
+    document.getElementById('result-title').textContent = `最適合您的是「${info.name}」`;
+    document.getElementById('result-subtitle').textContent =
+      '根據您的回答，以下是個人化的信託規劃建議';
+
+    const cardsEl = document.getElementById('result-cards');
+    cardsEl.innerHTML = '';
+
+    const labels = ['最推薦', '次要考慮', '也值得了解'];
+    sorted.slice(0, 3).forEach(([key, score], i) => {
+      const t = trustInfo[key];
+      const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+      const div = document.createElement('div');
+      div.className = `result-card ${i === 0 ? 'primary' : i === 1 ? 'secondary' : 'tertiary'}`;
+      div.innerHTML = `
+        <div class="result-card-label">${labels[i]}</div>
+        <div class="result-card-name">${t.emoji} ${t.name}</div>
+        <div class="result-card-desc">${t.desc}</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:0%; background:${t.barColor}" data-pct="${pct}"></div>
+          </div>
+          <div class="score-pct">${pct}%</div>
+        </div>
+      `;
+      cardsEl.appendChild(div);
+    });
+
+    setTimeout(() => {
+      document.querySelectorAll('.score-bar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    }, 100);
+
+    document.getElementById('progress-bar').style.width = '100%';
+  }
+
+  function restartQuiz() {
+    currentQ = 0;
+    answers = {};
+    document.getElementById('screen-result').classList.add('hidden');
+    document.getElementById('screen-intro').classList.remove('hidden');
+  }
+
+</script>
+</body>
+</html>

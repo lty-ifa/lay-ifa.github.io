@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>預約財務諮詢 | Esther 小懿 IFA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+      background: #f5f0eb;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 48px 40px;
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #9b8b7a;
+      letter-spacing: 0.1em;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #4a3728;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #9b8b7a;
+      margin-bottom: 36px;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a3728;
+      margin-bottom: 6px;
+    }
+
+    label .req {
+      color: #c0392b;
+      margin-left: 2px;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1.5px solid #e0d6cc;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 15px;
+      color: #333;
+      background: #faf8f6;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #9b8b7a;
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .row .field {
+      flex: 1;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #333;
+      padding: 10px 14px;
+      border: 1.5px solid #e0d6cc;
+      border-radius: 8px;
+      background: #faf8f6;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    .checkbox-item:hover {
+      border-color: #9b8b7a;
+      background: #fff;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border: 1.5px solid #c0a890;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      accent-color: #4a3728;
+      padding: 0;
+    }
+
+    .checkbox-item.checked {
+      border-color: #4a3728;
+      background: #f0ebe4;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      background: #4a3728;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { background: #6b5040; }
+    .btn:active { transform: scale(0.98); }
+
+    .note {
+      text-align: center;
+      font-size: 12px;
+      color: #b0a090;
+      margin-top: 16px;
+    }
+
+    .note a { color: #9b8b7a; }
+
+    .thank-you {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .thank-you .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .thank-you h2 {
+      font-size: 22px;
+      color: #4a3728;
+      margin-bottom: 10px;
+    }
+
+    .thank-you p {
+      font-size: 15px;
+      color: #6b5040;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 32px 20px; }
+      .row { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div id="form-section">
+      <div class="logo">@esther_asset</div>
+      <h1>預約財務諮詢</h1>
+      <p class="subtitle">填寫以下資訊，Esther 會盡快與你確認時間</p>
+
+      <form onsubmit="handleSubmit(event)">
+        <div class="row">
+          <div class="field">
+            <label>姓名 <span class="req">*</span></label>
+            <input type="text" name="姓名" placeholder="王小明" required />
+          </div>
+          <div class="field">
+            <label>聯絡電話 <span class="req">*</span></label>
+            <input type="tel" name="聯絡電話" placeholder="0912-345-678" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>LINE ID <span class="req">*</span></label>
+          <input type="text" name="LINE ID" placeholder="例：esther_ifa" required />
+          <div style="font-size:12px; color:#9b8b7a; margin-top:6px;">請記得開放陌生好友加入，Esther 才能順利聯繫你</div>
+        </div>
+
+        <div class="field">
+          <label>希望諮詢時間 <span class="req">*</span></label>
+          <input type="text" name="希望諮詢時間" placeholder="例：5/20 下午 2-4 點皆可" required />
+        </div>
+
+        <div class="field" id="topic-field">
+          <label id="topic-label">諮詢主題 <span class="req">*</span></label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="海內外信託" />海內外信託</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="商業資產配置" />商業資產配置</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="理財型貸款" />理財型貸款</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="資產傳承" />資產傳承</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="稅務試算" />稅務試算</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="初次免費諮詢" />初次免費諮詢</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="個人整體財務健診" />個人整體財務健診</label>
+            <label class="checkbox-item"><input type="checkbox" name="諮詢主題" value="其他" />其他</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>備註（選填）</label>
+          <textarea name="備註" placeholder="例：目前有保單想一起檢視、或希望視訊/面談..."></textarea>
+        </div>
+
+        <button type="submit" class="btn">送出預約申請</button>
+      </form>
+
+      <p class="note">
+        送出後 Esther 將於 1-2 個工作日內回覆確認<br />
+        LINE：<a href="https://line.me/ti/p/~0925352662">0925352662</a>
+      </p>
+    </div>
+
+    <div class="thank-you" id="thank-you">
+      <div class="icon">&#x2713;</div>
+      <h2>預約申請已送出！</h2>
+      <p>
+        謝謝你的信任<br />
+        Esther 會在 <strong>1-2 個工作日</strong>內聯絡你確認時間<br /><br />
+        如有急事可直接 LINE：<strong>0925352662</strong>
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.checkbox-item').forEach(item => {
+      item.addEventListener('change', () => {
+        item.classList.toggle('checked', item.querySelector('input').checked);
+      });
+    });
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+
+      const checked = form.querySelectorAll('input[name="諮詢主題"]:checked');
+      if (checked.length === 0) {
+        document.getElementById('topic-label').style.color = '#c0392b';
+        alert('請至少選擇一個諮詢主題');
+        return;
+      }
+
+      const topics = Array.from(checked).map(c => c.value).join('、');
+      const payload = new FormData();
+      payload.append('_subject', '【新預約】財務諮詢預約通知');
+      payload.append('_captcha', 'false');
+      payload.append('_template', 'table');
+
+      for (let [k, v] of new FormData(form).entries()) {
+        if (k !== '諮詢主題') payload.append(k, v);
+      }
+      payload.append('諮詢主題', topics);
+
+      fetch('https://formsubmit.co/ajax/lintiyi77@gmail.com', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: payload
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success === 'true' || data.success === true) {
+          document.getElementById('form-section').style.display = 'none';
+          document.getElementById('thank-you').style.display = 'block';
+        } else {
+          alert('送出失敗，請稍後再試或直接 LINE 聯繫。');
+        }
+      })
+      .catch(() => {
+        alert('網路異常，請稍後再試或直接 LINE 聯繫。');
+      });
+    }
+  </script>
+</body>
+</html>

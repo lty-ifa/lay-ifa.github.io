@@ -414,9 +414,16 @@
           </div>
         </div>
         <div class="field">
-          <label>預計投入總額（萬元）</label>
+          <label>一次性投入（萬元）</label>
           <div class="input-wrap">
             <input type="number" id="yearly" placeholder="100" min="0" />
+            <span class="unit">萬</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>每月定期投入（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="monthly" placeholder="3" min="0" step="0.1" />
             <span class="unit">萬</span>
           </div>
         </div>
@@ -456,7 +463,7 @@
       <div id="dsr-box" style="display:none; margin-top:10px; padding:14px 16px; border-radius:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <div style="font-size:12px; font-weight:600; color:#6b5040; margin-bottom:4px;">償債比率（每年還款 ÷ 年收入）</div>
+            <div style="font-size:12px; font-weight:600; color:#6b5040; margin-bottom:4px;">負債比率（每年還款 ÷ 年收入）</div>
             <div style="font-size:12px; color:#9b8b7a;">建議不超過 35%</div>
           </div>
           <div style="text-align:right;">
@@ -686,6 +693,8 @@
       const current = parseFloat(document.getElementById('current').value) || 0;
       const income = parseFloat(document.getElementById('income').value) || 0;
       const yearly = parseFloat(document.getElementById('yearly').value) || 0;
+      const monthly = parseFloat(document.getElementById('monthly').value) || 0;
+      const annualMonthly = monthly * 12;
       const rate = parseFloat(document.getElementById('rate').value) || 0;
       const targetBase = parseFloat(document.getElementById('target').value) || 0;
       const inflation = parseFloat(document.getElementById('inflation').value) || 0;
@@ -734,9 +743,10 @@
         const totalDebtRemaining = debtRemaining.reduce((s, v) => s + v, 0) + ioRemaining;
         const disposable = income - debtRepay;
 
-        // 試算只有投入金額在滾，收入餘額是生活費不加入
+        // 一次性投入第一年加入，每月定期投入每年累加
         if (y === 1) { asset += yearly; totalInvested = yearly; }
-        asset = asset * (1 + annualRate);
+        asset = (asset + annualMonthly) * (1 + annualRate);
+        totalInvested += annualMonthly;
         const gain = asset - totalInvested;
         const netAsset = asset - totalDebtRemaining;
         labels.push(`第 ${y} 年`);
@@ -744,7 +754,7 @@
         targetValues.push(parseFloat(adjustedTarget.toFixed(1)));
         tableRows.push({ year: y, invested: totalInvested, gain, asset, netAsset, debtRepay, totalDebtRemaining, disposable, adjustedTarget });
 
-        if (reachYear === null && netAsset >= adjustedTarget) reachYear = y;
+        if (reachYear === null && netAsset >= targetBase) reachYear = y;
         if (gainExceedsDebtYear === null && debtRepay > 0 && gain >= debtRepay) gainExceedsDebtYear = y;
         if (netPositiveYear === null && netAsset > 0) netPositiveYear = y;
       }

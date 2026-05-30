@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>借貸槓桿安全線試算 | @ely_ifa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+      background: #f5f0eb;
+      color: #333;
+      min-height: 100vh;
+      padding: 40px 16px;
+    }
+
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      font-size: 13px;
+      color: #9b8b7a;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4a3728;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #9b8b7a;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 34px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #4a3728;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1.5px solid #f0ebe4;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b5040;
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .field-note {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #b0a090;
+      margin-top: 6px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap .unit {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: #9b8b7a;
+      pointer-events: none;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      border: 1.5px solid #e0d6cc;
+      border-radius: 8px;
+      padding: 10px 42px 10px 14px;
+      font-size: 15px;
+      color: #333;
+      background: #faf8f6;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      font-family: inherit;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    input[type="number"]:focus {
+      border-color: #9b8b7a;
+      background: #fff;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      background: #4a3728;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      margin-top: 20px;
+      transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    .btn:hover { background: #6b5040; }
+    .btn:active { transform: scale(0.98); }
+
+    .result-section { display: none; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .score-card {
+      border-radius: 14px;
+      padding: 20px;
+      border: 1.5px solid #e0d6cc;
+      background: #faf8f6;
+    }
+
+    .score-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .score-kicker {
+      font-size: 12px;
+      color: #9b8b7a;
+      margin-bottom: 6px;
+    }
+
+    .score-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #4a3728;
+      line-height: 1.3;
+    }
+
+    .score-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #4a3728;
+      white-space: nowrap;
+      line-height: 1.1;
+    }
+
+    .score-badge {
+      display: inline-block;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 12px;
+      margin-top: 14px;
+    }
+
+    .score-advice {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #6b5040;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0d6cc;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .stat-box {
+      background: #faf8f6;
+      border: 1.5px solid #e0d6cc;
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+      min-height: 100px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #9b8b7a;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #4a3728;
+      line-height: 1.2;
+    }
+
+    .stat-unit {
+      font-size: 13px;
+      font-weight: 400;
+      margin-left: 2px;
+    }
+
+    .meter-block {
+      margin-top: 18px;
+    }
+
+    .meter-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: #6b5040;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .meter {
+      position: relative;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: linear-gradient(90deg, #73b77a 0 35%, #e7bb64 35% 55%, #d66a5f 55% 100%);
+    }
+
+    .meter-marker {
+      position: absolute;
+      top: -4px;
+      width: 4px;
+      height: 22px;
+      border-radius: 99px;
+      background: #4a3728;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.9);
+    }
+
+    .meter-scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #9b8b7a;
+      margin-top: 7px;
+    }
+
+    .note-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .note-box {
+      background: #faf8f6;
+      border: 1.5px solid #e0d6cc;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .note-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a3728;
+      margin-bottom: 8px;
+    }
+
+    .note-text {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #6b5040;
+    }
+
+    .contact {
+      text-align: center;
+      margin-top: 32px;
+      padding: 24px 16px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(74,55,40,0.07);
+    }
+
+    .contact-label {
+      font-size: 13px;
+      color: #9b8b7a;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .contact-items {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #4a3728;
+      font-weight: 600;
+    }
+
+    .contact a {
+      display: inline-block;
+      background: #4a3728;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: #9b8b7a;
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 760px) {
+      .input-grid,
+      .score-grid,
+      .note-list { grid-template-columns: 1fr; }
+
+      .result-grid { grid-template-columns: 1fr 1fr; }
+      .card { padding: 24px 18px; }
+    }
+
+    @media (max-width: 420px) {
+      .result-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="index.html">‹ 回工具首頁</a>
+
+    <div class="header">
+      <div class="logo">@ely_ifa</div>
+      <h1>借貸槓桿安全線試算</h1>
+      <p class="subtitle">輸入借款、收入與投資假設，快速檢查槓桿是否還在可控範圍</p>
+      <p style="font-size:12px; color:#b0a090; margin-top:6px;">本工具以每月還本息金額估算，結果僅供個人財務規劃參考</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">基本資料</div>
+      <div class="input-grid">
+        <div class="field">
+          <label>可投資資產（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="assets" min="0" value="500" />
+            <span class="unit">萬</span>
+          </div>
+          <div class="field-note">不含自住房與緊急預備金</div>
+        </div>
+        <div class="field">
+          <label>借款金額（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="loan" min="0" value="200" />
+            <span class="unit">萬</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>每月償還金額（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="monthly-payment" min="0" step="0.1" value="3" />
+            <span class="unit">萬</span>
+          </div>
+          <div class="field-note">含本金與利息</div>
+        </div>
+        <div class="field">
+          <label>月收入（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="monthly-income" min="0" step="0.1" value="10" />
+            <span class="unit">萬</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>每月固定支出（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="monthly-expense" min="0" step="0.1" value="4" />
+            <span class="unit">萬</span>
+          </div>
+          <div class="field-note">生活費、保費、房租等</div>
+        </div>
+        <div class="field">
+          <label>既有每月債務（萬元）</label>
+          <div class="input-wrap">
+            <input type="number" id="existing-debt" min="0" step="0.1" value="1.5" />
+            <span class="unit">萬</span>
+          </div>
+          <div class="field-note">房貸、車貸、信貸等月繳</div>
+        </div>
+        <div class="field">
+          <label>預期年化報酬率（%）</label>
+          <div class="input-wrap">
+            <input type="number" id="return-rate" min="-30" max="40" step="0.1" value="6" />
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>市場下跌壓力測試（%）</label>
+          <div class="input-wrap">
+            <input type="number" id="drawdown" min="0" max="80" step="1" value="30" />
+            <span class="unit">%</span>
+          </div>
+          <div class="field-note">估算跌幅後槓桿是否過高</div>
+        </div>
+      </div>
+      <button class="btn" onclick="calculate()">開始試算</button>
+    </div>
+
+    <div class="result-section" id="result">
+      <div class="card">
+        <div class="card-title">試算結果</div>
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="score-head">
+              <div>
+                <div class="score-kicker">DSR 評分</div>
+                <div class="score-title">債務月付 ÷ 月收入</div>
+              </div>
+              <div class="score-value" id="dsr-score-value">—</div>
+            </div>
+            <div class="meter">
+              <div class="meter-marker" id="dsr-marker"></div>
+            </div>
+            <div class="meter-scale">
+              <span>0%</span>
+              <span>35% 安全</span>
+              <span>55% 警戒</span>
+              <span>100%+</span>
+            </div>
+            <div class="score-badge" id="dsr-badge">—</div>
+            <div class="score-advice" id="dsr-advice">—</div>
+          </div>
+
+          <div class="score-card">
+            <div class="score-head">
+              <div>
+                <div class="score-kicker">槓桿率評分</div>
+                <div class="score-title">借款 ÷ 可投資資產</div>
+              </div>
+              <div class="score-value" id="leverage-score-value">—</div>
+            </div>
+            <div class="meter">
+              <div class="meter-marker" id="leverage-marker"></div>
+            </div>
+            <div class="meter-scale">
+              <span>0%</span>
+              <span>35% 安全</span>
+              <span>55% 警戒</span>
+              <span>100%+</span>
+            </div>
+            <div class="score-badge" id="leverage-badge">—</div>
+            <div class="score-advice" id="leverage-advice">—</div>
+          </div>
+        </div>
+
+        <div class="result-grid">
+          <div class="stat-box">
+            <div class="stat-label">每月還本息</div>
+            <div class="stat-value" id="monthly-payment-result">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">既有每月債務</div>
+            <div class="stat-value" id="existing-debt-result">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">預估投資年收益</div>
+            <div class="stat-value" id="annual-return">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">年還款壓力</div>
+            <div class="stat-value" id="annual-debt-payment">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">壓力測試與提醒</div>
+        <div class="note-list">
+          <div class="note-box">
+            <div class="note-title">下跌後資產狀態</div>
+            <div class="note-text" id="stress-text">—</div>
+          </div>
+          <div class="note-box">
+            <div class="note-title">現金流緩衝</div>
+            <div class="note-text" id="cashflow-text">—</div>
+          </div>
+          <div class="note-box">
+            <div class="note-title">加槓桿前先看這三件事</div>
+            <div class="note-text">1. 每月還本息是否吃掉現金流<br/>2. 淨資產下跌後是否仍高於借款<br/>3. 投資預估收益是否足以支撐年還款壓力</div>
+          </div>
+          <div class="note-box">
+            <div class="note-title">分級規則</div>
+            <div class="note-text">安全：槓桿率與 DSR 都低於 35%<br/>留意：任一指標落在 35%-55%，或年收益低於年還款<br/>警戒：任一指標高於 55%，或每月現金流為負</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact">
+      <div class="contact-label">想確認自己的借貸結構適不適合？可以直接找我討論</div>
+      <div class="contact-items">
+        <div class="contact-item">💬 LINE：0925352662</div>
+        <div class="contact-item">📷 IG：@ely_ifa</div>
+        <a href="booking.html">預約免費諮詢</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function n(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function fmt(value, digits = 1) {
+      return value.toLocaleString('zh-TW', { maximumFractionDigits: digits });
+    }
+
+    function pct(value) {
+      return fmt(value, 1) + '%';
+    }
+
+    function gradeDSR(dsrRatio, cashflowAfterDebt) {
+      if (dsrRatio > 55 || cashflowAfterDebt < 0) {
+        return {
+          key: 'danger',
+          title: '警戒區',
+          color: '#b6534b',
+          copy: '每月債務已吃掉太多收入，或扣除固定支出後現金流為負。建議先降低月付、拉長還款期、減少借款，或等收入提高後再加槓桿。'
+        };
+      }
+
+      if (dsrRatio > 35) {
+        return {
+          key: 'watch',
+          title: '留意區',
+          color: '#b9873d',
+          copy: '月付壓力偏高，但還沒有進入危險區。建議至少保留 6-12 個月現金流緩衝，並避免再新增高月付債務。'
+        };
+      }
+
+      return {
+        key: 'safe',
+        title: '安全區',
+        color: '#5d9b65',
+        copy: '月付壓力相對健康。仍建議保留緊急預備金，並定期檢查收入、支出與既有債務是否改變。'
+      };
+    }
+
+    function gradeLeverage(leverageRatio, stressedNet, repaymentCoverage) {
+      if (leverageRatio > 55 || stressedNet < 0) {
+        return {
+          key: 'danger',
+          title: '警戒區',
+          color: '#b6534b',
+          copy: '借款占資產比例偏高，壓力測試後可能低於借款金額。建議先降低借款比例，避免市場回檔時被迫賣出資產。'
+        };
+      }
+
+      if (leverageRatio > 35 || repaymentCoverage < 100) {
+        return {
+          key: 'watch',
+          title: '留意區',
+          color: '#b9873d',
+          copy: '槓桿仍可控，但資產波動和年還款壓力需要管理。建議確認投資預估年收益是否能覆蓋年還款，並降低單一資產集中度。'
+        };
+      }
+
+      return {
+        key: 'safe',
+        title: '安全區',
+        color: '#5d9b65',
+        copy: '借款占資產比例相對健康。仍建議定期做下跌壓力測試，避免行情好時把槓桿越加越高。'
+      };
+    }
+
+    function setMarker(id, value) {
+      const marker = document.getElementById(id);
+      marker.style.left = Math.min(Math.max(value, 0), 100) + '%';
+    }
+
+    function calculate() {
+      const assets = n('assets');
+      const loan = n('loan');
+      const monthlyPayment = n('monthly-payment');
+      const monthlyIncome = n('monthly-income');
+      const monthlyExpense = n('monthly-expense');
+      const existingDebt = n('existing-debt');
+      const returnRate = n('return-rate');
+      const drawdown = n('drawdown');
+
+      if (assets <= 0) { alert('請輸入可投資資產'); return; }
+      if (monthlyIncome <= 0) { alert('請輸入月收入'); return; }
+
+      const totalDebtPayment = monthlyPayment + existingDebt;
+      const dsrRatio = totalDebtPayment / monthlyIncome * 100;
+      const leverageRatio = loan / assets * 100;
+      const annualInvestmentReturn = assets * (returnRate / 100);
+      const annualDebtPayment = totalDebtPayment * 12;
+      const repaymentCoverage = annualDebtPayment > 0 ? annualInvestmentReturn / annualDebtPayment * 100 : 999;
+      const cashflowAfterDebt = monthlyIncome - monthlyExpense - totalDebtPayment;
+      const stressedAssets = assets * (1 - drawdown / 100);
+      const stressedNet = stressedAssets - loan;
+      const stressedLeverage = stressedAssets > 0 ? loan / stressedAssets * 100 : 999;
+      const dsrGrade = gradeDSR(dsrRatio, cashflowAfterDebt);
+      const leverageGrade = gradeLeverage(leverageRatio, stressedNet, repaymentCoverage);
+
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('dsr-score-value').textContent = pct(dsrRatio);
+      document.getElementById('leverage-score-value').textContent = pct(leverageRatio);
+      document.getElementById('dsr-badge').textContent = dsrGrade.title;
+      document.getElementById('dsr-badge').style.background = dsrGrade.color;
+      document.getElementById('leverage-badge').textContent = leverageGrade.title;
+      document.getElementById('leverage-badge').style.background = leverageGrade.color;
+      document.getElementById('dsr-advice').textContent = dsrGrade.copy;
+      document.getElementById('leverage-advice').textContent = leverageGrade.copy;
+      document.getElementById('monthly-payment-result').innerHTML = fmt(monthlyPayment, 2) + '<span class="stat-unit">萬</span>';
+      document.getElementById('existing-debt-result').innerHTML = fmt(existingDebt, 2) + '<span class="stat-unit">萬</span>';
+      document.getElementById('annual-return').innerHTML = fmt(annualInvestmentReturn, 1) + '<span class="stat-unit">萬</span>';
+      document.getElementById('annual-debt-payment').innerHTML = fmt(annualDebtPayment, 1) + '<span class="stat-unit">萬</span>';
+
+      setMarker('leverage-marker', leverageRatio);
+      setMarker('dsr-marker', dsrRatio);
+
+      const stressStatus = stressedNet >= 0
+        ? '下跌 ' + pct(drawdown) + ' 後，資產約 ' + fmt(stressedAssets) + ' 萬，扣除借款後仍有 ' + fmt(stressedNet) + ' 萬。壓力後槓桿率約 ' + pct(stressedLeverage) + '。'
+        : '下跌 ' + pct(drawdown) + ' 後，資產約 ' + fmt(stressedAssets) + ' 萬，已低於借款金額，缺口約 ' + fmt(Math.abs(stressedNet)) + ' 萬。';
+
+      const cashflowStatus = cashflowAfterDebt >= 0
+        ? '扣除固定支出、既有債務與新增還本息後，每月約剩 ' + fmt(cashflowAfterDebt, 2) + ' 萬。投資預估年收益約 ' + fmt(annualInvestmentReturn, 1) + ' 萬，年還款約 ' + fmt(annualDebtPayment, 1) + ' 萬。'
+        : '扣除固定支出、既有債務與新增還本息後，每月缺口約 ' + fmt(Math.abs(cashflowAfterDebt), 2) + ' 萬。建議先降低借款或調整支出。';
+
+      document.getElementById('stress-text').textContent = stressStatus;
+      document.getElementById('cashflow-text').textContent = cashflowStatus;
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    window.addEventListener('DOMContentLoaded', calculate);
+  </script>
+</body>
+</html>

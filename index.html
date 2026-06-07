@@ -1,185 +1,254 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@ely_ifa｜財務工具</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>市場工具箱</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f7f8;
+      --panel: #ffffff;
+      --ink: #182028;
+      --muted: #637083;
+      --line: #dce2e8;
+      --blue: #125d98;
+      --green: #13795b;
+      --red: #b42318;
+      --soft-blue: #e8f2fb;
+      --soft-green: #e8f5ef;
+      --shadow: 0 14px 32px rgba(16, 24, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
 
     body {
-      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
-      background: #f5f0eb;
-      color: #333;
+      margin: 0;
       min-height: 100vh;
-      padding: 48px 16px;
+      background:
+        linear-gradient(180deg, rgba(232, 242, 251, 0.95), rgba(245, 247, 248, 0.64) 330px),
+        var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.5;
     }
 
-    .container {
-      max-width: 560px;
+    .app {
+      width: min(1040px, calc(100% - 28px));
       margin: 0 auto;
+      padding: 28px 0 48px;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .logo {
-      font-size: 13px;
-      color: #9b8b7a;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 18px;
     }
 
     h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #4a3728;
-      margin-bottom: 6px;
+      margin: 0;
+      font-size: clamp(28px, 6vw, 48px);
+      letter-spacing: 0;
     }
 
-    .tagline {
+    .subline {
+      color: var(--muted);
       font-size: 14px;
-      color: #9b8b7a;
+      margin-top: 4px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      padding: 0 12px;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 750;
     }
 
     .tools {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 40px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
     }
 
-    .tool-card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(74,55,40,0.08);
-      padding: 28px 28px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      text-decoration: none;
+    .tool {
+      display: grid;
+      min-height: 250px;
+      padding: 18px;
       color: inherit;
-      transition: box-shadow 0.2s, transform 0.15s;
+      text-decoration: none;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      transition: transform 140ms ease, border-color 140ms ease;
     }
 
-    .tool-card:hover {
-      box-shadow: 0 6px 24px rgba(74,55,40,0.15);
+    .tool:hover {
       transform: translateY(-2px);
+      border-color: #b9c7d4;
     }
 
-    .tool-icon {
-      font-size: 36px;
-      flex-shrink: 0;
-      width: 56px;
-      height: 56px;
-      background: #f5f0eb;
-      border-radius: 14px;
+    .tool-top {
       display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .icon.blue {
+      color: var(--blue);
+      background: var(--soft-blue);
+    }
+
+    .icon.green {
+      color: var(--green);
+      background: var(--soft-green);
+    }
+
+    .tag {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-    }
-
-    .tool-info { flex: 1; }
-
-    .tool-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #4a3728;
-      margin-bottom: 4px;
-    }
-
-    .tool-desc {
-      font-size: 13px;
-      color: #9b8b7a;
-      line-height: 1.6;
-    }
-
-    .tool-arrow {
-      font-size: 18px;
-      color: #c0a890;
-      flex-shrink: 0;
-    }
-
-    .contact {
-      text-align: center;
-      padding: 24px 20px;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(74,55,40,0.07);
+      white-space: nowrap;
     }
 
-    .contact-label {
-      font-size: 13px;
-      color: #9b8b7a;
-      margin-bottom: 14px;
+    .tool h2 {
+      margin: 22px 0 8px;
+      font-size: 24px;
+      letter-spacing: 0;
     }
 
-    .contact-items {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-
-    .contact-item {
+    .tool p {
+      margin: 0;
+      color: var(--muted);
       font-size: 14px;
-      font-weight: 600;
-      color: #4a3728;
-      display: flex;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .feature {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px;
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .launch {
+      align-self: end;
+      margin-top: 18px;
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      min-height: 40px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 850;
+      font-size: 14px;
+    }
+
+    @media (max-width: 760px) {
+      header {
+        display: block;
+      }
+
+      .status {
+        margin-top: 10px;
+      }
+
+      .tools {
+        grid-template-columns: 1fr;
+      }
+
+      .tool {
+        min-height: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-
-    <div class="header">
-      <div class="logo">@ely_ifa</div>
-      <h1>@ely_ifa</h1>
-      <p class="tagline">資產結構設計師｜獨立財務顧問</p>
-    </div>
-
-    <div class="tools">
-      <a href="booking.html" class="tool-card">
-        <div class="tool-icon">📅</div>
-        <div class="tool-info">
-          <div class="tool-title">預約免費諮詢</div>
-          <div class="tool-desc">填寫基本資料與諮詢需求，我會在 1-2 個工作日內回覆確認時間</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-
-      <a href="asset-forecast.html" class="tool-card">
-        <div class="tool-icon">📊</div>
-        <div class="tool-info">
-          <div class="tool-title">資產預測試算</div>
-          <div class="tool-desc">輸入現有資產、負債與年收入，試算距離財務目標還需要多少時間</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-
-      <a href="leverage-safety.html" class="tool-card">
-        <div class="tool-icon">⚖️</div>
-        <div class="tool-info">
-          <div class="tool-title">借貸槓桿安全線試算</div>
-          <div class="tool-desc">輸入借款、利率、收入與投資假設，檢查槓桿率、DSR 與壓力測試結果</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-    </div>
-
-    <div class="contact">
-      <div class="contact-label">有任何問題？歡迎直接聯絡我</div>
-      <div class="contact-items">
-        <div class="contact-item">💬 LINE：0925352662</div>
-        <div class="contact-item">📷 IG：@ely_ifa</div>
+  <main class="app">
+    <header>
+      <div>
+        <h1>市場工具箱</h1>
+        <div class="subline">手機打開後選工具，資料即時抓公開 API。</div>
       </div>
-    </div>
+      <div class="status">GitHub Pages</div>
+    </header>
 
-  </div>
+    <section class="tools">
+      <a class="tool" href="./oi.html">
+        <div class="tool-top">
+          <div class="icon blue">OI</div>
+          <span class="tag">Crypto</span>
+        </div>
+        <div>
+          <h2>OI 異常掃描</h2>
+          <p>掃 Binance USDT-M Futures，顯示 OI 強異常、P90/P95、多空持倉紅綠比例。</p>
+          <div class="features">
+            <div class="feature">OI 變化</div>
+            <div class="feature">多空持倉</div>
+            <div class="feature">P90 / P95</div>
+            <div class="feature">流動性加掃</div>
+          </div>
+        </div>
+        <div class="launch">打開 OI 掃描</div>
+      </a>
+
+      <a class="tool" href="./stock-chip.html">
+        <div class="tool-top">
+          <div class="icon green">TW</div>
+          <span class="tag">Taiwan Stock</span>
+        </div>
+        <div>
+          <h2>個股籌碼查詢</h2>
+          <p>查 TWSE 上市股票三大法人、融資融券、資券互抵、強勢股與基本籌碼訊號。</p>
+          <div class="features">
+            <div class="feature">三大法人</div>
+            <div class="feature">融資融券</div>
+            <div class="feature">資券互抵</div>
+            <div class="feature">強勢股</div>
+          </div>
+        </div>
+        <div class="launch">打開籌碼查詢</div>
+      </a>
+    </section>
+  </main>
+
 </body>
 </html>

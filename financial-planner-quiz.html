@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="理財規劃人員專業能力測驗歷屆試題練習與自動評分">
+  <title>理財規劃人員歷屆試題練習</title>
+  <style>
+    :root {
+      --navy: #071220;
+      --panel: #102238;
+      --panel-soft: #162b43;
+      --gold: #c9a86a;
+      --gold-light: #ead8b2;
+      --text: #edf2f8;
+      --muted: #9caabd;
+      --line: rgba(255,255,255,.12);
+      --good: #4fd0a1;
+      --bad: #ff827d;
+      --warn: #f1bd63;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(45,112,137,.18), transparent 28rem),
+        radial-gradient(circle at 90% 80%, rgba(201,168,106,.11), transparent 28rem),
+        var(--navy);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+
+    a { color: inherit; }
+    button, select { font: inherit; }
+    .page { width: min(1440px, calc(100% - 32px)); margin: 0 auto; padding: 26px 0 50px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .brand { color: var(--gold-light); font-size: 12px; font-weight: 800; letter-spacing: .14em; }
+    .back { color: var(--muted); font-size: 13px; text-decoration: none; }
+    .back:hover { color: var(--gold-light); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 28px;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, rgba(24,45,68,.92), rgba(10,25,42,.94));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.26);
+    }
+    .eyebrow { margin-bottom: 8px; color: var(--gold); font-size: 11px; font-weight: 850; letter-spacing: .14em; }
+    h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 44px); line-height: 1.2; letter-spacing: -.035em; }
+    .lead { max-width: 760px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.8; }
+    .rule-pill { padding: 12px 16px; color: var(--gold-light); background: rgba(201,168,106,.1); border: 1px solid rgba(201,168,106,.3); border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(180px, 260px)) minmax(0, 1fr);
+      gap: 12px;
+      align-items: end;
+      padding: 18px;
+      margin-bottom: 18px;
+      background: rgba(16,34,56,.82);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    label { display: grid; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 750; }
+    select {
+      min-height: 42px;
+      padding: 0 12px;
+      color: var(--text);
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+    }
+    .official-link { justify-self: end; color: var(--gold-light); font-size: 12px; text-underline-offset: 3px; }
+
+    .scoreboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .score-card { padding: 16px 18px; background: rgba(16,34,56,.76); border: 1px solid var(--line); border-radius: 13px; }
+    .score-label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+    .score-value { margin-top: 5px; font-size: 20px; font-weight: 850; }
+    .score-value.pending { color: #7f8da1; }
+    .score-value.pass { color: var(--good); }
+    .score-value.fail { color: var(--bad); }
+
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(440px, .65fr); gap: 16px; align-items: start; }
+    .paper, .answer-panel { background: rgba(16,34,56,.78); border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 54px; padding: 0 17px; border-bottom: 1px solid var(--line); }
+    .panel-title { font-size: 14px; font-weight: 850; }
+    .panel-note { color: var(--muted); font-size: 11px; }
+    iframe { display: block; width: 100%; height: 800px; border: 0; background: #fff; }
+    .pdf-fallback { display: none; padding: 22px; color: var(--muted); line-height: 1.7; }
+
+    .answer-panel { position: sticky; top: 12px; }
+    .progress-wrap { padding: 14px 17px 0; }
+    .progress-row { display: flex; justify-content: space-between; margin-bottom: 7px; color: var(--muted); font-size: 11px; }
+    .progress { height: 6px; overflow: hidden; background: #071321; border-radius: 999px; }
+    .progress > div { width: 0; height: 100%; background: linear-gradient(90deg, var(--gold), #e7c98d); transition: width .2s ease; }
+    .answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 610px; padding: 14px 17px; overflow-y: auto; }
+    .answer-row { display: grid; grid-template-columns: 28px repeat(4, 1fr); gap: 4px; align-items: center; padding: 7px; background: rgba(255,255,255,.035); border: 1px solid transparent; border-radius: 8px; }
+    .answer-row.correct { border-color: rgba(79,208,161,.55); background: rgba(79,208,161,.08); }
+    .answer-row.wrong { border-color: rgba(255,130,125,.55); background: rgba(255,130,125,.08); }
+    .answer-row.blank { border-color: rgba(241,189,99,.42); }
+    .qno { color: var(--muted); font-size: 11px; font-weight: 800; text-align: center; }
+    .choice { position: relative; display: grid; place-items: center; min-height: 29px; cursor: pointer; }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice span { display: grid; place-items: center; width: 27px; height: 27px; color: #aeb9c8; border: 1px solid var(--line); border-radius: 50%; font-size: 11px; font-weight: 800; transition: .16s ease; }
+    .choice input:checked + span { color: #071220; background: var(--gold-light); border-color: var(--gold-light); transform: scale(1.06); }
+    .answer-key { grid-column: 1 / -1; display: none; margin-top: 3px; color: var(--gold-light); font-size: 10px; text-align: center; }
+    .reviewed .answer-key { display: block; }
+
+    .actions { display: grid; grid-template-columns: 1fr auto; gap: 9px; padding: 15px 17px 17px; border-top: 1px solid var(--line); }
+    .btn { min-height: 43px; padding: 0 17px; border: 0; border-radius: 9px; cursor: pointer; font-weight: 850; }
+    .btn-primary { color: #071220; background: linear-gradient(135deg, var(--gold-light), var(--gold)); }
+    .btn-soft { color: var(--text); background: var(--panel-soft); border: 1px solid var(--line); }
+    .result { display: none; margin: 0 17px 15px; padding: 15px; border-radius: 10px; line-height: 1.65; }
+    .result.show { display: block; }
+    .result.pass { color: #baf3df; background: rgba(79,208,161,.1); border: 1px solid rgba(79,208,161,.35); }
+    .result.fail { color: #ffd0cd; background: rgba(255,130,125,.1); border: 1px solid rgba(255,130,125,.35); }
+    .result strong { display: block; font-size: 22px; }
+    .legal-note { margin: 16px 2px 0; color: #718096; font-size: 11px; line-height: 1.7; }
+
+    .access-gate {
+      position: fixed;
+      z-index: 999;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        linear-gradient(rgba(4,12,22,.9), rgba(4,12,22,.96)),
+        url("../出圖/backgrounds/cover_skyline_moscow.jpg") center / cover no-repeat;
+    }
+    .access-card {
+      width: min(420px, 100%);
+      padding: 30px;
+      background: rgba(16,34,56,.94);
+      border: 1px solid rgba(201,168,106,.3);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.48);
+      backdrop-filter: blur(18px);
+    }
+    .access-card h2 { margin: 8px 0 9px; font-size: 27px; }
+    .access-card p { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .password-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    .password-row input {
+      min-width: 0;
+      min-height: 44px;
+      padding: 0 13px;
+      color: var(--text);
+      background: #091829;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      font: inherit;
+      outline: none;
+    }
+    .password-row input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,106,.1); }
+    .access-error { min-height: 20px; margin-top: 9px; color: var(--bad); font-size: 12px; }
+    .access-back { display: inline-block; margin-top: 15px; color: var(--muted); font-size: 12px; text-decoration: none; }
+    .access-back:hover { color: var(--gold-light); }
+    body.access-granted .access-gate { display: none; }
+
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 1fr; }
+      .answer-panel { position: static; }
+      iframe { height: 620px; }
+      .answers { max-height: none; }
+    }
+    @media (max-width: 680px) {
+      .page { width: min(100% - 20px, 1440px); padding-top: 18px; }
+      .hero { grid-template-columns: 1fr; padding: 22px 18px; }
+      .rule-pill { justify-self: start; white-space: normal; }
+      .controls { grid-template-columns: 1fr; }
+      .official-link { justify-self: start; }
+      .scoreboard { grid-template-columns: 1fr; }
+      .answers { grid-template-columns: 1fr; padding: 12px; }
+      .answer-row { grid-template-columns: 34px repeat(4, 1fr); }
+      iframe { height: 520px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <section class="access-gate" id="accessGate" aria-labelledby="accessTitle">
+    <form class="access-card" id="accessForm">
+      <div class="eyebrow">PRIVATE TOOL · 限制進入</div>
+      <h2 id="accessTitle">請輸入密碼</h2>
+      <p>此頁為理財規劃人員歷屆試題練習工具，請輸入密碼後繼續。</p>
+      <div class="password-row">
+        <input id="passwordInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="輸入密碼" required autofocus>
+        <button class="btn btn-primary" type="submit">進入</button>
+      </div>
+      <div class="access-error" id="accessError" role="alert"></div>
+      <a class="access-back" href="index.html">← 回工具首頁</a>
+    </form>
+  </section>
+
+  <main class="page" id="contentPage" inert>
+    <nav class="topbar">
+      <div class="brand">ELY · INDEPENDENT FINANCIAL ADVISOR</div>
+      <a class="back" href="index.html">← 回工具首頁</a>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">EXAM PRACTICE · 歷屆試題練習</div>
+        <h1>理財規劃人員測驗</h1>
+        <p class="lead">選擇屆次與科目，對照左側金融研訓院官方題本，在答案卡作答後自動計分。舊題涉及的法規可能已修正，請以現行法規為準。</p>
+      </div>
+      <div class="rule-pill">50 題 × 2 分｜70 分合格</div>
+    </header>
+
+    <section class="controls" aria-label="試卷設定">
+      <label>屆次
+        <select id="editionSelect">
+          <option value="48">第 48 屆</option>
+          <option value="47">第 47 屆</option>
+          <option value="46">第 46 屆</option>
+        </select>
+      </label>
+      <label>科目
+        <select id="subjectSelect">
+          <option value="tools">理財工具</option>
+          <option value="practice">理財規劃實務</option>
+        </select>
+      </label>
+      <a class="official-link" id="officialLink" href="#" target="_blank" rel="noreferrer">另開官方 PDF ↗</a>
+    </section>
+
+    <section class="scoreboard" aria-label="本屆成績">
+      <div class="score-card"><div class="score-label">理財工具</div><div class="score-value pending" id="toolsScore">尚未作答</div></div>
+      <div class="score-card"><div class="score-label">理財規劃實務</div><div class="score-value pending" id="practiceScore">尚未作答</div></div>
+      <div class="score-card"><div class="score-label">兩科結果</div><div class="score-value pending" id="overallScore">待完成兩科</div></div>
+    </section>
+
+    <section class="workspace">
+      <article class="paper">
+        <div class="panel-head">
+          <div class="panel-title" id="paperTitle">第 48 屆｜理財工具</div>
+          <div class="panel-note">題本來源：台灣金融研訓院</div>
+        </div>
+        <iframe id="paperFrame" title="官方歷屆試題 PDF"></iframe>
+        <div class="pdf-fallback">若瀏覽器無法顯示 PDF，請點選上方「另開官方 PDF」。</div>
+      </article>
+
+      <aside class="answer-panel">
+        <div class="panel-head">
+          <div class="panel-title">答案卡</div>
+          <div class="panel-note" id="answeredText">已作答 0 / 50</div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-row"><span>作答進度</span><span id="progressPercent">0%</span></div>
+          <div class="progress"><div id="progressBar"></div></div>
+        </div>
+        <form id="answerForm">
+          <div class="answers" id="answers"></div>
+          <div class="result" id="result" aria-live="polite"></div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">交卷並計分</button>
+            <button class="btn btn-soft" type="button" id="resetBtn">重填</button>
+          </div>
+        </form>
+      </aside>
+    </section>
+
+    <p class="legal-note">本工具僅提供作答與評分介面，試題 PDF 直接連結台灣金融研訓院官方檔案。官方說明歷屆解答以當時法規為準，如法規修正請自行更正。本頁不儲存作答紀錄，重新整理頁面後資料會消失。</p>
+  </main>
+
+  <script>
+    const ACCESS_HASH = '70425373a1836d6d0390dc6fef838a468717fba7776d66065a5043488f9f041b';
+
+    async function sha256(value) {
+      const bytes = new TextEncoder().encode(value);
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    function grantAccess() {
+      document.body.classList.add('access-granted');
+      document.getElementById('contentPage').removeAttribute('inert');
+      sessionStorage.setItem('financialPlannerQuizAccess', 'granted');
+    }
+
+    if (sessionStorage.getItem('financialPlannerQuizAccess') === 'granted') grantAccess();
+
+    document.getElementById('accessForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = document.getElementById('passwordInput');
+      const error = document.getElementById('accessError');
+      error.textContent = '';
+      try {
+        if (await sha256(input.value) === ACCESS_HASH) {
+          input.value = '';
+          grantAccess();
+        } else {
+          error.textContent = '密碼錯誤，請重新輸入。';
+          input.select();
+        }
+      } catch (err) {
+        error.textContent = '瀏覽器無法進行密碼驗證，請改用最新版瀏覽器。';
+      }
+    });
+
+    const exams = {
+      48: {
+        tools: {
+          pdf: 'https://service.tabf.org.tw/BEExam/Doc/ExamHistoryEdit/663411-1.pdf',
+          answers: [4,4,2,3,3,3,1,3,2,1,3,3,3,4,1,4,1,4,2,2,3,4,3,3,3,4,2,2,1,2,1,2,3,3,4,3,2,1,1,1,4,3,3,4,4,4,2,4,3,2]
+        },
+        practice: {
+          pdf: 'https://service.tabf.org.tw/BEExam/Doc/ExamHistoryEdit/663411-2.pdf',
+          answers: [4,2,2,3,3,2,2,4,3,3,3,2,1,2,1,2,2,3,2,2,1,2,4,4,3,3,2,3,1,4,4,4,4,3,4,3,3,4,4,2,3,2,1,3,1,2,3,4,4,1]
+        }
+      },
+      47: {
+        tools: {
+          pdf: 'https://service.tabf.org.tw/BEExam/Doc/ExamHistoryEdit/647393-1.pdf',
+          answers: [1,2,1,1,1,3,3,4,1,4,3,2,1,2,3,3,2,3,4,4,4,3,2,3,1,2,3,3,2,1,1,1,2,3,1,4,4,4,1,2,3,1,3,3,3,4,1,2,1,3]
+        },
+        practice: {
+          pdf: 'https://service.tabf.org.tw/BEExam/Doc/ExamHistoryEdit/647393-2.pdf',
+          answers: [4,2,1,1,4,4,4,4,2,3,4,2,4,4,1,3,3,4,1,1,1,2,3,1,3,4,1,2,2,1,3,1,3,3,3,4,3,2,3,3,4,4,4,1,2,3,4,3,2,3]
+        }
+      },
+      46: {
+        tools: {
+          pdf: 'https://service.tabf.org.tw/BEExam/Doc/ExamHistoryEdit/617840-1.pdf',
+          answers: [4,2,3,3,1,4,1,2,4,4,3,2,3,1,3,[2,3],3,3,4,3,1,1,4,4,3,1,1,2,2,1,1,3,4,4,3,3,1,4,3,2,3,2,2,3,1,3,1,1,3,1]
+        },
+        practice: {
+          pdf: 'https://service.tabf.org.tw/BEExam/Doc/ExamHistoryEdit/617840-2.pdf',
+          answers: [1,2,1,3,3,1,4,1,1,4,4,3,3,4,3,4,3,3,1,3,4,4,2,3,4,4,4,2,2,3,2,2,4,[3,4],3,2,1,3,4,3,3,2,4,1,2,3,3,3,2,2]
+        }
+      }
+    };
+
+    const subjectNames = { tools: '理財工具', practice: '理財規劃實務' };
+    const state = { edition: '48', subject: 'tools', scores: {} };
+    const editionSelect = document.getElementById('editionSelect');
+    const subjectSelect = document.getElementById('subjectSelect');
+    const answersEl = document.getElementById('answers');
+    const form = document.getElementById('answerForm');
+    const resultEl = document.getElementById('result');
+
+    function renderAnswerSheet() {
+      answersEl.innerHTML = '';
+      for (let i = 1; i <= 50; i += 1) {
+        const row = document.createElement('div');
+        row.className = 'answer-row';
+        row.dataset.question = i;
+        row.innerHTML = `<div class="qno">${i}</div>` + [1,2,3,4].map(choice => `
+          <label class="choice" aria-label="第 ${i} 題選項 ${choice}">
+            <input type="radio" name="q${i}" value="${choice}">
+            <span>${choice}</span>
+          </label>`).join('') + '<div class="answer-key"></div>';
+        answersEl.appendChild(row);
+      }
+    }
+
+    function currentExam() {
+      return exams[state.edition][state.subject];
+    }
+
+    function updatePaper() {
+      const exam = currentExam();
+      document.getElementById('paperFrame').src = exam.pdf;
+      document.getElementById('officialLink').href = exam.pdf;
+      document.getElementById('paperTitle').textContent = `第 ${state.edition} 屆｜${subjectNames[state.subject]}`;
+    }
+
+    function updateProgress() {
+      const answered = form.querySelectorAll('input[type="radio"]:checked').length;
+      const percent = answered * 2;
+      document.getElementById('answeredText').textContent = `已作答 ${answered} / 50`;
+      document.getElementById('progressPercent').textContent = `${percent}%`;
+      document.getElementById('progressBar').style.width = `${percent}%`;
+    }
+
+    function resetSheet() {
+      form.reset();
+      answersEl.querySelectorAll('.answer-row').forEach(row => {
+        row.classList.remove('correct', 'wrong', 'blank', 'reviewed');
+        row.querySelector('.answer-key').textContent = '';
+      });
+      resultEl.className = 'result';
+      resultEl.innerHTML = '';
+      updateProgress();
+    }
+
+    function updateScoreboard() {
+      ['tools', 'practice'].forEach(subject => {
+        const el = document.getElementById(`${subject}Score`);
+        const record = state.scores[subject];
+        if (!record) {
+          el.textContent = '尚未作答';
+          el.className = 'score-value pending';
+          return;
+        }
+        el.textContent = `${record.score} 分｜${record.pass ? '合格' : '未合格'}`;
+        el.className = `score-value ${record.pass ? 'pass' : 'fail'}`;
+      });
+      const overall = document.getElementById('overallScore');
+      const bothDone = state.scores.tools && state.scores.practice;
+      if (!bothDone) {
+        overall.textContent = '待完成兩科';
+        overall.className = 'score-value pending';
+      } else {
+        const passed = state.scores.tools.pass && state.scores.practice.pass;
+        overall.textContent = passed ? '兩科合格' : '尚未通過';
+        overall.className = `score-value ${passed ? 'pass' : 'fail'}`;
+      }
+    }
+
+    function switchPaper({ editionChanged = false } = {}) {
+      state.edition = editionSelect.value;
+      state.subject = subjectSelect.value;
+      if (editionChanged) state.scores = {};
+      resetSheet();
+      updatePaper();
+      updateScoreboard();
+    }
+
+    form.addEventListener('change', updateProgress);
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const key = currentExam().answers;
+      let correct = 0;
+      let blank = 0;
+
+      key.forEach((accepted, index) => {
+        const row = answersEl.querySelector(`[data-question="${index + 1}"]`);
+        const chosen = form.querySelector(`input[name="q${index + 1}"]:checked`);
+        const acceptedValues = Array.isArray(accepted) ? accepted : [accepted];
+        row.classList.remove('correct', 'wrong', 'blank');
+        row.classList.add('reviewed');
+        row.querySelector('.answer-key').textContent = `正解：${acceptedValues.join(' 或 ')}`;
+        if (!chosen) {
+          blank += 1;
+          row.classList.add('blank');
+        } else if (acceptedValues.includes(Number(chosen.value))) {
+          correct += 1;
+          row.classList.add('correct');
+        } else {
+          row.classList.add('wrong');
+        }
+      });
+
+      const score = correct * 2;
+      const pass = score >= 70;
+      const wrong = 50 - correct - blank;
+      state.scores[state.subject] = { score, pass, correct, wrong, blank };
+      updateScoreboard();
+      resultEl.className = `result show ${pass ? 'pass' : 'fail'}`;
+      resultEl.innerHTML = `<strong>${score} 分｜${pass ? '合格' : '未合格'}</strong>答對 ${correct} 題、答錯 ${wrong} 題、未作答 ${blank} 題。${pass ? '' : `還差 ${35 - correct} 題達到 70 分。`}`;
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', resetSheet);
+    editionSelect.addEventListener('change', () => switchPaper({ editionChanged: true }));
+    subjectSelect.addEventListener('change', () => switchPaper());
+
+    renderAnswerSheet();
+    switchPaper({ editionChanged: true });
+  </script>
+</body>
+</html>

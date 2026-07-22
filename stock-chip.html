@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stock Chip｜台股籌碼雷達</title>
+  <title>台股籌碼雷達</title>
   <style>
     :root {
       color-scheme: dark;
@@ -393,13 +393,6 @@
       background: var(--soft-red);
     }
 
-    .chip-link {
-      text-decoration: none;
-      color: #1f3a5f;
-      border-color: #d7dce3;
-      background: #f7f7f5;
-    }
-
     .data-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -737,12 +730,6 @@
       background: #2b1820;
     }
 
-    .chip-link {
-      color: #5bbcff;
-      border-color: #5bbcff;
-      background: #13263a;
-    }
-
     .rank-row {
       border-color: #34465e;
       background: #0d1522;
@@ -847,14 +834,252 @@
       .dashboard-controls p { font-size: 12px; }
       .refresh-all { width: 100%; min-height: 48px; }
     }
+
+    /* Neon technology theme */
+    body {
+      position: relative;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 12% 4%, rgba(0, 229, 255, 0.14), transparent 28rem),
+        radial-gradient(circle at 90% 18%, rgba(112, 92, 255, 0.12), transparent 26rem),
+        linear-gradient(145deg, #050914 0%, #080f1d 48%, #050a13 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image:
+        linear-gradient(rgba(91, 188, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91, 188, 255, 0.1) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, #000, transparent 78%);
+    }
+
+    .app { position: relative; z-index: 1; }
+
+    .topbar {
+      border-bottom-color: rgba(91, 188, 255, 0.5);
+      box-shadow: 0 14px 28px -24px rgba(0, 229, 255, 0.9);
+    }
+
+    h1 {
+      color: #f4fbff;
+      background: linear-gradient(90deg, #fff, #8eeaff 58%, #aea5ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 28px rgba(91, 188, 255, 0.2);
+    }
+
+    .subline { color: #90a9c5; }
+    .live-mark { text-shadow: 0 0 12px rgba(53, 211, 154, 0.65); }
+
+    .live-mark::before {
+      box-shadow: 0 0 7px currentColor, 0 0 22px currentColor;
+      animation: neonPulse 2.2s ease-in-out infinite;
+    }
+
+    .panel,
+    .rank-row,
+    .cell,
+    .context-box,
+    .strong-cell,
+    .hero-stat,
+    .detail-group {
+      background: linear-gradient(145deg, rgba(18, 29, 47, 0.96), rgba(9, 17, 31, 0.96));
+      border-color: rgba(91, 188, 255, 0.25);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .panel:hover,
+    .rank-row:hover {
+      border-color: rgba(91, 188, 255, 0.52);
+      box-shadow: 0 0 24px rgba(41, 176, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .dashboard-controls {
+      border-color: rgba(91, 188, 255, 0.44);
+      box-shadow: 0 0 28px rgba(25, 154, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .dashboard-controls h2,
+    .result-title,
+    .strong-zone .result-title,
+    .turning-zone .result-title,
+    .card-title,
+    .rank-main > strong,
+    .detail-group h4 { color: #eef8ff; }
+
+    .card-sub,
+    .hero-stat span,
+    .group-value span,
+    .financing-row span { color: #8fa5be; }
+
+    .result-heading {
+      border-bottom-color: rgba(91, 188, 255, 0.62);
+      box-shadow: 0 12px 22px -22px #5bbcff;
+    }
+
+    .result-heading span,
+    .turning-zone > .result-heading span {
+      color: #68cfff;
+      text-shadow: 0 0 10px rgba(91, 188, 255, 0.45);
+    }
+
+    .refresh-all,
+    .primary {
+      background: linear-gradient(135deg, #126ba5, #604fd1);
+      border: 1px solid rgba(118, 220, 255, 0.62);
+      box-shadow: 0 0 20px rgba(38, 176, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .refresh-all.is-loading::before {
+      content: "";
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 9px;
+      vertical-align: -2px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: loadingSpin 0.7s linear infinite;
+    }
+
+    .signal,
+    .signal.good,
+    .signal.bad { background: rgba(9, 18, 32, 0.96); }
+
+    @keyframes neonPulse {
+      0%, 100% { opacity: 0.65; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    @keyframes loadingSpin { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .live-mark::before,
+      .refresh-all.is-loading::before { animation: none; }
+    }
+
+    /* Clear visual separation between the two ranking zones */
+    .result-section {
+      position: relative;
+      margin-top: 30px;
+      padding: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(91, 188, 255, 0.34);
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(8, 24, 40, 0.82), rgba(6, 13, 25, 0.9));
+      box-shadow: 0 0 34px rgba(39, 190, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .result-section::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: #55dfff;
+      box-shadow: 0 0 10px #55dfff, 0 0 24px rgba(85, 223, 255, 0.7);
+    }
+
+    .result-section::after {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -100px;
+      width: 260px;
+      height: 260px;
+      pointer-events: none;
+      border-radius: 50%;
+      background: rgba(42, 189, 255, 0.11);
+      filter: blur(40px);
+    }
+
+    .turning-zone {
+      margin-top: 44px;
+      border-color: rgba(166, 130, 255, 0.38);
+      background: linear-gradient(145deg, rgba(25, 18, 49, 0.82), rgba(8, 13, 27, 0.92));
+      box-shadow: 0 0 36px rgba(128, 87, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .turning-zone::before {
+      background: #a682ff;
+      box-shadow: 0 0 10px #a682ff, 0 0 24px rgba(166, 130, 255, 0.72);
+    }
+
+    .turning-zone::after { background: rgba(137, 88, 255, 0.13); }
+
+    .result-section .result-heading {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 16px;
+      padding: 0 0 13px;
+    }
+
+    .strong-zone .result-heading { border-bottom-color: rgba(85, 223, 255, 0.7); }
+    .turning-zone .result-heading { border-bottom-color: rgba(166, 130, 255, 0.72); }
+
+    .result-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .result-title::before {
+      content: "01";
+      display: inline-grid;
+      place-items: center;
+      min-width: 34px;
+      height: 26px;
+      padding: 0 6px;
+      border: 1px solid rgba(85, 223, 255, 0.62);
+      border-radius: 6px;
+      color: #87eaff;
+      background: rgba(18, 104, 139, 0.24);
+      box-shadow: 0 0 14px rgba(85, 223, 255, 0.17);
+      font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.08em;
+    }
+
+    .turning-zone .result-title::before {
+      content: "02";
+      color: #c3adff;
+      border-color: rgba(166, 130, 255, 0.65);
+      background: rgba(92, 57, 165, 0.25);
+      box-shadow: 0 0 14px rgba(166, 130, 255, 0.2);
+    }
+
+    .turning-zone .result-heading span {
+      color: #bba1ff;
+      text-shadow: 0 0 10px rgba(166, 130, 255, 0.5);
+    }
+
+    .result-section > div:not(.result-heading) {
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 560px) {
+      .result-section { margin-top: 18px; padding: 14px 10px 12px 14px; border-radius: 13px; }
+      .turning-zone { margin-top: 30px; }
+      .result-section .result-heading { padding: 0 0 11px; }
+      .result-title { gap: 7px; }
+      .result-title::before { min-width: 30px; height: 24px; }
+    }
   </style>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
       <div>
-        <h1>Stock Chip</h1>
-        <div class="subline">台股籌碼雷達 · 法人動向 · 融資水位</div>
+        <h1>台股籌碼雷達</h1>
+        <div class="subline">法人動向 · 籌碼變化 · 融資水位</div>
       </div>
       <div class="live-mark">Market Intelligence</div>
     </header>
@@ -1052,14 +1277,6 @@
     function signedPct(value) {
       if (!Number.isFinite(value)) return "--";
       return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
-    }
-
-    function brokerChipUrl(code) {
-      return `https://histock.tw/stock/chips.aspx?no=${encodeURIComponent(code)}`;
-    }
-
-    function renderBrokerChipLink(code) {
-      return `<a class="badge chip-link" href="${brokerChipUrl(code)}" target="_blank" rel="noopener noreferrer">買賣家數差</a>`;
     }
 
     function resetApiDebug() {
@@ -1437,7 +1654,6 @@
             </div>
             <div class="strong-split">
               <span class="badge ${signal.tone === "bad" ? "bad" : signal.tone === "good" ? "good" : ""}">${inst?.total >= 0 ? "法人買超" : "法人賣超"}</span>
-              ${renderBrokerChipLink(code)}
             </div>
           </div>
           <div class="data-grid">
@@ -1581,7 +1797,6 @@
           <article class="panel card">
             <div class="card-head">
               <div>
-                <div class="card-title">外資投信連買前 ${n} 名</div>
                 <div class="card-sub">排除 ETF，由最新交易日往前計算外資與投信同時買超的連續天數；天數相同時依最新三大法人買超排序</div>
               </div>
               <span class="badge good">${days[0].date}~${latestDate}</span>
@@ -1591,7 +1806,7 @@
                 <div class="rank-row strong-detail">
                   <div class="rank-no">#${index + 1}</div>
                   <div class="rank-main">
-                    <strong>${row.code} ${row.name} ${renderBrokerChipLink(row.code)}</strong>
+                    <strong>${row.code} ${row.name}</strong>
                     <div class="signal-hero">
                       <div class="hero-stat primary-stat">
                         <span>外資投信連買</span>
@@ -1706,7 +1921,6 @@
           <article class="panel card">
             <div class="card-head">
               <div>
-                <div class="card-title">籌碼轉強前 ${n} 名</div>
                 <div class="card-sub">排除 ETF，最新三大法人買超，法人買盤改善，投信買超 100 張以上，賣超變化只納入改善分數</div>
               </div>
               <span class="badge good">${previousDay.date}~${latestDay.date}</span>
@@ -1716,7 +1930,7 @@
                 <div class="rank-row strong-detail">
                   <div class="rank-no">#${index + 1}</div>
                   <div class="rank-main">
-                    <strong>${row.code} ${row.name} ${renderBrokerChipLink(row.code)}</strong>
+                    <strong>${row.code} ${row.name}</strong>
                     <div class="signal-hero">
                       <div class="hero-stat primary-stat">
                         <span>改善分數</span>
@@ -1773,7 +1987,9 @@
 
     async function refreshAllInformation() {
       els.refreshAll.disabled = true;
-      els.refreshAll.textContent = "更新中…";
+      els.refreshAll.classList.add("is-loading");
+      els.refreshAll.setAttribute("aria-busy", "true");
+      els.refreshAll.textContent = "資料更新中…";
       els.date.value = todayYmd();
       els.rank.value = "10";
       els.strongResult.innerHTML = `<div class="panel empty">正在更新強勢股排行…</div>`;
@@ -1789,6 +2005,8 @@
       } finally {
         els.result = els.strongResult;
         els.refreshAll.disabled = false;
+        els.refreshAll.classList.remove("is-loading");
+        els.refreshAll.removeAttribute("aria-busy");
         els.refreshAll.textContent = "更新全部資訊";
       }
     }

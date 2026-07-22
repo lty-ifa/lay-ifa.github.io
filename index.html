@@ -1,194 +1,347 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@ely_ifa｜財務工具</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="@ely_ifa 自製財務規劃與市場分析工具">
+  <title>自己做的小工具自取｜@ely_ifa</title>
   <style>
+    :root {
+      --navy: #0b1628;
+      --navy-soft: #16243a;
+      --gold: #c8a96b;
+      --gold-light: #e5d2a8;
+      --paper: #f4f6f8;
+      --white: #ffffff;
+      --ink: #182234;
+      --muted: #6f7a8a;
+      --line: #dde2e8;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
-      background: #f5f0eb;
-      color: #333;
       min-height: 100vh;
-      padding: 48px 16px;
-    }
-
-    .container {
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .logo {
-      font-size: 13px;
-      color: #9b8b7a;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
-    }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #4a3728;
-      margin-bottom: 6px;
-    }
-
-    .tagline {
-      font-size: 14px;
-      color: #9b8b7a;
-    }
-
-    .tools {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-
-    .tool-card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(74,55,40,0.08);
-      padding: 28px 28px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      text-decoration: none;
-      color: inherit;
-      transition: box-shadow 0.2s, transform 0.15s;
-    }
-
-    .tool-card:hover {
-      box-shadow: 0 6px 24px rgba(74,55,40,0.15);
-      transform: translateY(-2px);
-    }
-
-    .tool-icon {
-      font-size: 36px;
-      flex-shrink: 0;
-      width: 56px;
-      height: 56px;
-      background: #f5f0eb;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .tool-info { flex: 1; }
-
-    .tool-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #4a3728;
-      margin-bottom: 4px;
-    }
-
-    .tool-desc {
-      font-size: 13px;
-      color: #9b8b7a;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 85% 0%, rgba(200, 169, 107, 0.12), transparent 24rem),
+        var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
       line-height: 1.6;
     }
 
-    .tool-arrow {
-      font-size: 18px;
-      color: #c0a890;
-      flex-shrink: 0;
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 430px;
+      color: var(--white);
+      background:
+        linear-gradient(90deg, rgba(5, 14, 26, 0.96) 0%, rgba(7, 18, 32, 0.9) 38%, rgba(8, 20, 35, 0.58) 70%, rgba(8, 20, 35, 0.72) 100%),
+        url("../出圖/backgrounds/cover_skyline_moscow.jpg") center 54% / cover no-repeat;
     }
 
-    .contact {
-      text-align: center;
-      padding: 24px 20px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(74,55,40,0.07);
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(8, 18, 31, 0.08), rgba(8, 18, 31, 0.5)),
+        radial-gradient(circle at 72% 46%, rgba(200, 169, 107, 0.13), transparent 22rem);
+      pointer-events: none;
     }
 
-    .contact-label {
-      font-size: 13px;
-      color: #9b8b7a;
-      margin-bottom: 14px;
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -110px;
+      bottom: -170px;
+      width: 370px;
+      height: 370px;
+      border: 1px solid rgba(200, 169, 107, 0.22);
+      border-radius: 50%;
+      box-shadow: 0 0 0 42px rgba(200, 169, 107, 0.04), 0 0 0 84px rgba(200, 169, 107, 0.025);
     }
 
-    .contact-items {
+    .hero-inner,
+    .main-inner {
+      width: min(760px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      padding: 54px 0 64px;
+    }
+
+    .brand {
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 24px;
+      gap: 10px;
+      margin-bottom: 38px;
+      color: var(--gold-light);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    h1 {
+      max-width: 620px;
+      margin-bottom: 16px;
+      font-size: clamp(31px, 6vw, 48px);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.035em;
+    }
+
+    .hero-copy {
+      max-width: 520px;
+      color: #c5cfdb;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+    }
+
+    .expertise {
+      display: flex;
       flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-top: 25px;
+      color: var(--gold-light);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
     }
 
-    .contact-item {
-      font-size: 14px;
-      font-weight: 600;
-      color: #4a3728;
+    .expertise span:not(:last-child)::after {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      margin-left: 18px;
+      vertical-align: middle;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .main-inner { padding: 48px 0 54px; }
+
+    .section { margin-bottom: 38px; }
+
+    .section-label {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+    }
+
+    .section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .tools {
+      display: grid;
+      gap: 12px;
+    }
+
+    .tool-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) 34px;
+      align-items: center;
+      gap: 18px;
+      min-height: 112px;
+      padding: 22px 24px;
+      overflow: hidden;
+      color: inherit;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(11, 22, 40, 0.045);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tool-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--gold);
+      transform: scaleY(0);
+      transition: transform 0.2s ease;
+    }
+
+    .tool-card:hover,
+    .tool-card:focus-visible {
+      outline: none;
+      transform: translateY(-2px);
+      border-color: rgba(200, 169, 107, 0.72);
+      box-shadow: 0 12px 30px rgba(11, 22, 40, 0.09);
+    }
+
+    .tool-card:hover::before,
+    .tool-card:focus-visible::before { transform: scaleY(1); }
+
+    .tool-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      color: var(--gold);
+      background: #f7f3ea;
+      border: 1px solid #e8ddc7;
+      border-radius: 10px;
+    }
+
+    .tool-icon svg {
+      width: 23px;
+      height: 23px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tool-title {
+      margin-bottom: 4px;
+      color: var(--navy);
+      font-size: 17px;
+      font-weight: 720;
+      letter-spacing: -0.01em;
+    }
+
+    .tool-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .tool-arrow {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      color: var(--navy-soft);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      font-size: 18px;
+      transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .tool-card:hover .tool-arrow {
+      color: #8c6f36;
+      border-color: var(--gold);
+      transform: translateX(2px);
+    }
+
+    footer {
+      padding: 23px 18px 30px;
+      color: #8993a1;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    @media (max-width: 600px) {
+      .hero {
+        min-height: 430px;
+        background-position: 43% center;
+        background-image:
+          linear-gradient(90deg, rgba(5, 14, 26, 0.96) 0%, rgba(7, 18, 32, 0.88) 62%, rgba(8, 20, 35, 0.68) 100%),
+          url("../出圖/backgrounds/cover_skyline_moscow.jpg");
+      }
+      .hero-inner { padding: 36px 0 46px; }
+      .brand { margin-bottom: 28px; }
+      .main-inner { padding: 34px 0 42px; }
+      .section { margin-bottom: 30px; }
+      .tool-card { grid-template-columns: 42px minmax(0, 1fr) 28px; gap: 13px; min-height: 104px; padding: 18px 15px; }
+      .tool-icon { width: 42px; height: 42px; }
+      .tool-icon svg { width: 21px; height: 21px; }
+      .tool-title { font-size: 16px; }
+      .tool-desc { font-size: 12px; }
+      .tool-arrow { width: 27px; height: 27px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tool-card,
+      .tool-card::before,
+      .tool-arrow { transition: none; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-
-    <div class="header">
-      <div class="logo">@ely_ifa</div>
-      <h1>@ely_ifa</h1>
-      <p class="tagline">資產結構設計師｜獨立財務顧問</p>
-    </div>
-
-    <div class="tools">
-      <a href="booking.html" class="tool-card">
-        <div class="tool-icon">📅</div>
-        <div class="tool-info">
-          <div class="tool-title">預約免費諮詢</div>
-          <div class="tool-desc">填寫基本資料與諮詢需求，我會在 1-2 個工作日內回覆確認時間</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-
-      <a href="asset-forecast.html" class="tool-card">
-        <div class="tool-icon">📊</div>
-        <div class="tool-info">
-          <div class="tool-title">資產預測試算</div>
-          <div class="tool-desc">輸入現有資產、負債與年收入，試算距離財務目標還需要多少時間</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-
-      <a href="asset-balance-forecast.html" class="tool-card">
-        <div class="tool-icon">📋</div>
-        <div class="tool-info">
-          <div class="tool-title">資產負債預測表</div>
-          <div class="tool-desc">用會計科目整理資產負債，加入理財型貸款、投資稅務、醫療長照與逐年預測表</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-
-      <a href="leverage-safety.html" class="tool-card">
-        <div class="tool-icon">⚖️</div>
-        <div class="tool-info">
-          <div class="tool-title">借貸槓桿安全線試算</div>
-          <div class="tool-desc">輸入借款、利率、收入與投資假設，檢查槓桿率、DSR 與壓力測試結果</div>
-        </div>
-        <div class="tool-arrow">›</div>
-      </a>
-    </div>
-
-    <div class="contact">
-      <div class="contact-label">有任何問題？歡迎直接聯絡我</div>
-      <div class="contact-items">
-        <div class="contact-item">💬 LINE：0925352662</div>
-        <div class="contact-item">📷 IG：@ely_ifa</div>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="brand">@ely_ifa · Independent Financial Advisor</div>
+      <h1>自己做的小工具自取，<br>有問題再留言問我。</h1>
+      <p class="hero-copy">資產規劃、財務目標與市場資訊工具，選需要的直接使用。</p>
+      <div class="expertise">
+        <span>資產結構設計</span><span>財務目標規劃</span><span>投資工具</span>
       </div>
     </div>
+  </header>
 
-  </div>
+  <main class="main-inner">
+    <section class="section" aria-labelledby="planningTitle">
+      <div class="section-label" id="planningTitle">FINANCIAL PLANNING · 財務規劃工具</div>
+      <div class="tools">
+        <a href="asset-forecast.html" class="tool-card">
+          <div class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m4 7 6-4 6 6 5-4"/></svg>
+          </div>
+          <div>
+            <div class="tool-title">資產預測試算</div>
+            <div class="tool-desc">輸入現有資產、負債與年收入，試算距離財務目標還需要多少時間。</div>
+          </div>
+          <div class="tool-arrow" aria-hidden="true">›</div>
+        </a>
+
+        <a href="asset-balance-forecast.html" class="tool-card">
+          <div class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 3h10v4H7zM5 5H4a2 2 0 0 0-2 2v13h20V7a2 2 0 0 0-2-2h-1"/><path d="M7 12h10M7 16h6"/></svg>
+          </div>
+          <div>
+            <div class="tool-title">資產負債預測表</div>
+            <div class="tool-desc">用會計科目整理資產負債，納入貸款、投資稅務、醫療長照與逐年預測。</div>
+          </div>
+          <div class="tool-arrow" aria-hidden="true">›</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="marketTitle">
+      <div class="section-label" id="marketTitle">MARKET INTELLIGENCE · 市場分析工具</div>
+      <div class="tools">
+        <a href="stock-chip.html" class="tool-card">
+          <div class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><path d="m4 8 6-6 6 8 5-5"/></svg>
+          </div>
+          <div>
+            <div class="tool-title">台股籌碼雷達</div>
+            <div class="tool-desc">查看法人動向、籌碼變化與融資水位，掌握強勢股及籌碼轉強排行。</div>
+          </div>
+          <div class="tool-arrow" aria-hidden="true">›</div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>獨立財務顧問 · 不隸屬任何金融機構</footer>
 </body>
 </html>

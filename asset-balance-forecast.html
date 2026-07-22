@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>資產負債預測表 | @ely_ifa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+      background: #f5f0eb;
+      color: #332820;
+      min-height: 100vh;
+      padding: 32px 14px 48px;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .topbar,
+    .header,
+    .summary-grid,
+    .two-col,
+    .three-col {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      color: #8d7a68;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .back-link,
+    .small-link {
+      color: #5b4230;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .back-link {
+      border: 1px solid #d9cabe;
+      background: rgba(255,255,255,0.62);
+      border-radius: 999px;
+      padding: 9px 14px;
+    }
+
+    .header {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      color: #4a3728;
+      font-size: 28px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #8d7a68;
+      font-size: 14px;
+      line-height: 1.8;
+      max-width: 760px;
+    }
+
+    .badge {
+      background: #4a3728;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-bottom: 18px;
+    }
+
+    .metric,
+    .panel {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 22px rgba(74,55,40,0.08);
+    }
+
+    .metric {
+      min-height: 104px;
+      padding: 17px 16px;
+      border: 1px solid #eadfd4;
+    }
+
+    .metric.dark {
+      background: #4a3728;
+      border-color: #4a3728;
+      color: #fff;
+    }
+
+    .metric.asset {
+      background: #eef5f0;
+      border-color: #c9dfcf;
+    }
+
+    .metric.liability {
+      background: #f8eeee;
+      border-color: #e6c9c4;
+    }
+
+    .metric.reserve {
+      background: #f6f0e5;
+      border-color: #e4d4b9;
+    }
+
+    .metric.deployable {
+      background: #eef2f7;
+      border-color: #c9d5e4;
+    }
+
+    .metric-label {
+      color: #9b8b7a;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .metric.dark .metric-label { color: #d8cabe; }
+    .metric.asset .metric-label { color: #607d66; }
+    .metric.liability .metric-label { color: #9b5a50; }
+    .metric.reserve .metric-label { color: #8d7350; }
+    .metric.deployable .metric-label { color: #5f7188; }
+
+    .metric-value {
+      color: #4a3728;
+      font-size: 22px;
+      font-weight: 850;
+      line-height: 1.2;
+    }
+
+    .metric.dark .metric-value { color: #fff; }
+    .metric.asset .metric-value { color: #2f6b43; }
+    .metric.liability .metric-value { color: #9f3d31; }
+    .metric.reserve .metric-value { color: #7a5b2e; }
+    .metric.deployable .metric-value { color: #385d88; }
+
+    .metric-note {
+      color: #9b8b7a;
+      font-size: 11px;
+      line-height: 1.5;
+      margin-top: 6px;
+    }
+
+    .two-col { grid-template-columns: 1fr 1fr; }
+    .three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .panel {
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      color: #4a3728;
+      font-size: 16px;
+      font-weight: 850;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid #f0ebe4;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .panel-title span {
+      color: #9b8b7a;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .section-label {
+      color: #6b5040;
+      font-size: 13px;
+      font-weight: 850;
+      margin: 18px 0 10px;
+    }
+
+    .section-label:first-child { margin-top: 0; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .field label,
+    .mini-label {
+      display: block;
+      color: #6b5040;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+
+    .input-wrap { position: relative; }
+
+    input,
+    select {
+      width: 100%;
+      border: 1.5px solid #e0d6cc;
+      border-radius: 8px;
+      background: #faf8f6;
+      color: #332820;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    input {
+      padding: 10px 41px 10px 12px;
+      -moz-appearance: textfield;
+    }
+
+    input::-webkit-inner-spin-button,
+    input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    input[type="date"] { padding-right: 10px; }
+
+    select {
+      padding: 10px 34px 10px 12px;
+      appearance: none;
+    }
+
+    input:focus,
+    select:focus {
+      background: #fff;
+      border-color: #9b8b7a;
+    }
+
+    .unit {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9b8b7a;
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .note {
+      color: #9b8b7a;
+      font-size: 12px;
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 850;
+      min-height: 38px;
+      padding: 0 14px;
+    }
+
+    .btn-primary { background: #4a3728; color: #fff; }
+    .btn-soft { background: #f0ebe4; color: #4a3728; }
+    .btn-danger { background: #f9e9e5; color: #a23b2a; }
+
+    .report-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .save-warning {
+      flex: 1 1 360px;
+      padding: 11px 14px;
+      color: #8a3b24;
+      background: #fff2e8;
+      border: 1px solid #efc7b4;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid #eee5dc;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 880px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px 9px;
+      border-top: 1px solid #f0ebe4;
+      text-align: right;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    th {
+      border-top: none;
+      background: #f0ebe4;
+      color: #4a3728;
+      font-weight: 850;
+    }
+
+    th:first-child,
+    td:first-child { text-align: left; }
+
+    td { color: #51463d; }
+
+    .investment-table input,
+    .investment-table select,
+    .debt-table input {
+      min-width: 100px;
+      padding-right: 10px;
+    }
+
+    .investment-table .name-input,
+    .debt-table .name-input { min-width: 140px; }
+
+    .investment-table .rate-input {
+      min-width: 72px;
+      max-width: 78px;
+    }
+
+    .forecast-reached td {
+      background: #f3eee8;
+      color: #4a3728;
+      font-weight: 850;
+    }
+
+    .tax-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .tax-card {
+      border: 1px solid #eadfd4;
+      background: #faf8f6;
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 140px;
+    }
+
+    .tax-title {
+      color: #4a3728;
+      font-size: 13px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+
+    .tax-text {
+      color: #6b5040;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .tax-text a { color: #4a3728; font-weight: 850; }
+
+    .tax-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .status-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .chart {
+      height: 240px;
+      border: 1.5px solid #e6ded5;
+      border-radius: 8px;
+      background:
+        linear-gradient(to top, rgba(240,235,228,0.65) 1px, transparent 1px),
+        #fff;
+      background-size: 100% 48px;
+      display: flex;
+      align-items: flex-end;
+      gap: 7px;
+      padding: 18px 14px 28px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .bar {
+      flex: 1;
+      min-width: 8px;
+      max-width: 34px;
+      border-radius: 4px 4px 0 0;
+      background: #8e735d;
+      position: relative;
+    }
+
+    .bar.reached { background: #4a3728; }
+
+    .bar span {
+      position: absolute;
+      left: 50%;
+      bottom: -21px;
+      transform: translateX(-50%);
+      color: #9b8b7a;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .contact {
+      text-align: center;
+      padding: 22px 16px;
+      color: #8d7a68;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .contact a {
+      color: #4a3728;
+      font-weight: 850;
+      text-decoration: none;
+    }
+
+    .report-info {
+      margin: 18px 0;
+      display: grid;
+      grid-template-columns: minmax(220px, 360px) minmax(0, 1fr);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .client-display {
+      color: #4a3728;
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1.5;
+      align-self: end;
+    }
+
+    @media (max-width: 960px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-col,
+      .three-col { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tax-card-grid { grid-template-columns: 1fr; }
+      .tax-summary-grid { grid-template-columns: 1fr 1fr; }
+      .status-summary-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      body { padding: 24px 12px 38px; }
+      .topbar,
+      .header,
+      .summary-grid,
+      .form-grid { grid-template-columns: 1fr; }
+      .header { align-items: start; }
+      h1 { font-size: 24px; }
+      .panel { padding: 20px 16px; }
+      .badge { justify-self: start; }
+      .toolbar { justify-content: stretch; }
+      .toolbar button { flex: 1; }
+      .report-actions { justify-content: stretch; }
+      .report-actions button { flex: 1; }
+      .tax-summary-grid { grid-template-columns: 1fr; }
+      .status-summary-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+        color: #222;
+        font-size: 10.5px;
+      }
+
+      .container {
+        max-width: none;
+        width: 100%;
+      }
+
+      .topbar,
+      .report-actions,
+      .toolbar,
+      .contact,
+      .btn-danger,
+      .back-link {
+        display: none !important;
+      }
+
+      .header {
+        display: block;
+        border-bottom: 2px solid #4a3728;
+        margin: 0 0 5mm;
+        padding-bottom: 4mm;
+      }
+
+      h1 {
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        max-width: none;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .badge {
+        display: none;
+      }
+
+      .print-meta {
+        display: block;
+        color: #6b5040;
+        font-size: 10px;
+        margin-top: 3mm;
+      }
+
+      .report-info {
+        grid-template-columns: 1fr;
+        margin: 0 0 4mm;
+      }
+
+      .report-info .field {
+        display: none;
+      }
+
+      .client-display {
+        border: 1px solid #d8d1c9;
+        color: #4a3728;
+        font-size: 12px;
+        padding: 2.5mm 3mm;
+      }
+
+      .panel,
+      .metric {
+        box-shadow: none;
+        border: 1px solid #d8d1c9;
+      }
+
+      .panel {
+        padding: 5mm;
+        margin-bottom: 5mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .panel.forecast-panel {
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .panel-title {
+        font-size: 14px;
+        margin-bottom: 4mm;
+        padding-bottom: 2mm;
+      }
+
+      .section-label {
+        margin: 4mm 0 2mm;
+      }
+
+      .metric {
+        min-height: 0;
+        padding: 3mm;
+        break-inside: avoid;
+      }
+
+      .metric-value {
+        font-size: 16px;
+      }
+
+      .metric-note {
+        font-size: 9.5px;
+      }
+
+      .summary-grid,
+      .tax-summary-grid,
+      .status-summary-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 3mm;
+      }
+
+      .two-col,
+      .three-col,
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 3mm;
+      }
+
+      input,
+      select {
+        border: none;
+        background: transparent;
+        padding-left: 0;
+        font-size: 10.5px;
+      }
+
+      .unit { display: none; }
+
+      .chart {
+        height: 36mm;
+        page-break-inside: avoid;
+      }
+
+      .tax-card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 3mm;
+      }
+
+      .tax-card {
+        min-height: 0;
+        padding: 4mm;
+      }
+
+      .table-wrap {
+        overflow: visible;
+        border-color: #d8d1c9;
+      }
+
+      table {
+        min-width: 0;
+        table-layout: fixed;
+        font-size: 8px;
+        width: 100%;
+      }
+
+      th,
+      td {
+        padding: 4px 3px;
+        white-space: normal;
+        line-height: 1.25;
+        word-break: break-word;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+
+      tr {
+        page-break-inside: avoid;
+      }
+
+      .investment-table input,
+      .investment-table select,
+      .debt-table input {
+        min-width: 0;
+      }
+
+      .summary-grid {
+        page-break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a class="brand" href="https://www.instagram.com/ifa_ely/" target="_blank" rel="noreferrer">@ely_ifa</a>
+      <a class="back-link" href="index.html">回工具首頁</a>
+    </div>
+
+    <div class="header">
+      <div>
+        <h1>資產負債預測表</h1>
+        <p class="subtitle">把資產負債表、理財型貸款、投資收益稅務與醫療長照預留金放在同一張表，快速看淨資產、可配置資產與達標年限。</p>
+      </div>
+      <div class="badge">NEW PLANNER</div>
+    </div>
+
+    <div class="report-actions">
+      <div class="save-warning" role="alert">⚠️ 沒有存檔功能，請一次填寫完畢。</div>
+      <button class="btn-soft" type="button" id="copyTableTopBtn">複製逐年預測表</button>
+    </div>
+
+    <section class="report-info">
+      <div class="field">
+        <label>客戶名稱</label>
+        <input id="clientName" type="text" placeholder="請輸入客戶名稱" oninput="updateClientName()">
+      </div>
+      <div class="client-display" id="clientNameDisplay">客戶：未填寫</div>
+    </section>
+
+    <section class="summary-grid">
+      <div class="metric asset">
+        <div class="metric-label">資產總額</div>
+        <div class="metric-value" id="sumAssets">0 萬</div>
+        <div class="metric-note" id="sumAssetsNote">會計資產 + 投資本金</div>
+      </div>
+      <div class="metric liability">
+        <div class="metric-label">負債總額</div>
+        <div class="metric-value" id="sumLiabilities">0 萬</div>
+        <div class="metric-note">短期 + 長期負債</div>
+      </div>
+      <div class="metric dark">
+        <div class="metric-label">淨資產</div>
+        <div class="metric-value" id="sumNetWorth">0 萬</div>
+        <div class="metric-note">資產 - 負債</div>
+      </div>
+      <div class="metric reserve">
+        <div class="metric-label">醫療長照預留</div>
+        <div class="metric-value" id="sumCareReserve">0 萬</div>
+        <div class="metric-note">月金額 x 月數</div>
+      </div>
+      <div class="metric deployable">
+        <div class="metric-label">可配置淨資產</div>
+        <div class="metric-value" id="sumDeployable">0 萬</div>
+        <div class="metric-note">淨資產 - 預留金</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">會計項目資產負債表 <span>金額單位：萬元</span></div>
+
+      <div>
+        <div class="section-label">資產</div>
+        <div class="form-grid">
+          <div class="field"><label>現金及活存</label><div class="input-wrap"><input data-asset type="number" value="30" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>定存 / 貨幣基金</label><div class="input-wrap"><input data-asset type="number" value="50" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>緊急預備金</label><div class="input-wrap"><input data-asset type="number" value="60" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>應收款 / 應收利息</label><div class="input-wrap"><input data-asset type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>保單價值準備金</label><div class="input-wrap"><input data-asset data-nonforecast type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>勞退一次領</label><div class="input-wrap"><input data-asset type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>勞退月退</label><div class="input-wrap"><input data-asset type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+          <div class="field"><label>其他資產</label><div class="input-wrap"><input data-asset type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+        </div>
+      </div>
+
+      <div class="section-label">負債</div>
+      <div class="toolbar">
+        <button class="btn-soft" type="button" id="addDebtBtn">新增負債項目</button>
+      </div>
+      <div class="table-wrap">
+        <table class="debt-table">
+          <thead>
+            <tr>
+              <th>負債項目</th>
+              <th>每月還款（萬）</th>
+              <th>剩餘月數</th>
+              <th>推估負債總額（萬）</th>
+              <th>年度還款（萬）</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="debtRows"></tbody>
+        </table>
+      </div>
+      <div class="note">一般負債用月付計算現金流；理財型貸款本金與利息在下方專區獨立計算，但會一起計入負債總額。</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">理財型貸款專區 <span>還息不還本，追蹤本金到期壓力</span></div>
+      <div class="form-grid">
+        <div class="field"><label>已動用本金</label><div class="input-wrap"><input id="loanPrincipal" type="number" value="300" min="0" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>可用額度</label><div class="input-wrap"><input id="loanLimit" type="number" value="500" min="0" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>年利率</label><div class="input-wrap"><input id="loanRate" type="number" value="3" min="0" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field"><label>本金保本 / 到期日</label><input id="loanDueDate" type="date"></div>
+      </div>
+      <div class="summary-grid" style="margin:16px 0 0;">
+        <div class="metric"><div class="metric-label">每月利息</div><div class="metric-value" id="loanMonthlyInterest">0 萬</div></div>
+        <div class="metric"><div class="metric-label">每年利息</div><div class="metric-value" id="loanAnnualInterest">0 萬</div></div>
+        <div class="metric"><div class="metric-label">額度使用率</div><div class="metric-value" id="loanUsage">0%</div></div>
+        <div class="metric"><div class="metric-label">到期壓力</div><div class="metric-value" id="loanDueStatus">未設定</div></div>
+        <div class="metric"><div class="metric-label">每期需付利息</div><div class="metric-value" id="loanFinalPayment">0 萬</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">投資專區 <span>本金、利息、開始領息日期、贖回日期</span></div>
+      <div class="toolbar">
+        <button class="btn-soft" type="button" id="addInvestmentBtn">新增投資項目</button>
+      </div>
+      <div class="table-wrap">
+        <table class="investment-table">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>稅務類型</th>
+              <th>本金</th>
+              <th>年化利息/配息</th>
+              <th>開始領息日期</th>
+              <th>距離領息</th>
+              <th>每年收益</th>
+              <th>贖回日期</th>
+              <th>距離贖回</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="investmentRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">投資稅務專區 <span>由投資專區的稅務類型自動帶入估算</span></div>
+      <div class="three-col">
+        <div class="field"><label>綜合所得淨額</label><div class="input-wrap"><input id="domesticTaxableIncome" type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>其他海外所得</label><div class="input-wrap"><input id="otherOverseasIncome" type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>基本所得額其他項目</label><div class="input-wrap"><input id="basicIncomeBase" type="number" value="0" min="0" step="1"><span class="unit">萬</span></div></div>
+      </div>
+      <div class="tax-summary-grid">
+        <div class="metric"><div class="metric-label">國內綜所稅級距</div><div class="metric-value" id="domesticTaxRate">0%</div></div>
+        <div class="metric"><div class="metric-label">國內綜所稅估算</div><div class="metric-value" id="domesticTaxAmount">0 萬</div></div>
+        <div class="metric"><div class="metric-label">投資本金合計</div><div class="metric-value" id="taxPrincipalTotal">0 萬</div></div>
+        <div class="metric"><div class="metric-label">投資總收益</div><div class="metric-value" id="taxGrossIncome">0 萬</div></div>
+        <div class="metric"><div class="metric-label">預估稅額</div><div class="metric-value" id="taxTotal">0 萬</div></div>
+        <div class="metric dark"><div class="metric-label">稅後收益</div><div class="metric-value" id="taxAfterIncome">0 萬</div></div>
+        <div class="metric"><div class="metric-label">海外所得合計</div><div class="metric-value" id="taxOverseasIncome">0 萬</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>投資項目</th>
+              <th>稅務類型</th>
+              <th>投資本金</th>
+              <th>每年收益</th>
+              <th>估算方式</th>
+              <th>估算稅額</th>
+              <th>稅後收益</th>
+            </tr>
+          </thead>
+          <tbody id="taxRows"></tbody>
+        </table>
+      </div>
+      <div class="note">稅額是規劃用估算：實際申報仍需依所得類別、配息組成、成本證明、扣繳資料與當年度申報戶狀況判斷。</div>
+
+      <div class="tax-card-grid">
+        <div class="tax-card">
+          <div class="tax-title">國內綜所稅級距</div>
+          <div class="tax-text">以 114 年度綜合所得稅級距估算：59 萬以下 5%、133 萬以下 12%、266 萬以下 20%、498 萬以下 30%、超過 498 萬 40%。來源：<a href="https://service.mof.gov.tw/public/Data/statistic/Year_Fin/113%E9%9B%BB%E5%AD%90%E6%9B%B8/htm/312020.pdf" target="_blank" rel="noreferrer">財政部統計處</a></div>
+        </div>
+        <div class="tax-card">
+          <div class="tax-title">境內基金</div>
+          <div class="tax-text">本工具用「綜合所得淨額 + 境內基金收益」的差額稅額估算；若配息包含不同所得類別，實務上要看基金配息通知與扣繳資料。</div>
+        </div>
+        <div class="tax-card">
+          <div class="tax-title">境外基金 / 海外所得</div>
+          <div class="tax-text">海外所得全年未達 100 萬元免計入；基本所得額超過 750 萬元部分，按 20% 計算基本稅額。來源：<a href="https://www.etax.nat.gov.tw/etwmain/tax-info/understanding/tax-saving-manual/national/individual-income-tax/6xKrvGR" target="_blank" rel="noreferrer">財政部稅務入口網</a></div>
+        </div>
+        <div class="tax-card">
+          <div class="tax-title">股票股利</div>
+          <div class="tax-text">股利可選合併課稅並按 8.5% 計算抵減，或以 28% 分開計稅；本工具用較低估算值作為規劃參考。來源：<a href="https://www.etax.nat.gov.tw/etwmain/tax-info/understanding/tax-q-and-a/national/individual-income-tax/taxation-scope/which-income/zZzO3re" target="_blank" rel="noreferrer">財政部稅務入口網</a></div>
+        </div>
+        <div class="tax-card">
+          <div class="tax-title">保險 / 年金（國內保單）</div>
+          <div class="tax-text">例如國泰人壽年金型保單，不是境外基金，也不是直接列海外所得 20%。年金給付、保險給付或解約差額需依保單稅務資料判斷。來源：<a href="https://www.etax.nat.gov.tw/etwmain/tax-info/understanding/tax-q-and-a/national/individual-income-tax/taxation-scope/which-income/bY89la8" target="_blank" rel="noreferrer">財政部稅務入口網</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">醫療長照專區 <span>醫療與長照皆用年計</span></div>
+      <div class="form-grid">
+        <div class="field"><label>醫療自費年金額</label><div class="input-wrap"><input id="medicalAnnual" type="number" value="36" min="0" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>醫療預估年數</label><div class="input-wrap"><input id="medicalYears" type="number" value="1" min="0" step="1"><span class="unit">年</span></div></div>
+        <div class="field"><label>長照年金額</label><div class="input-wrap"><input id="careAnnual" type="number" value="60" min="0" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>長照預估年數</label><div class="input-wrap"><input id="careYears" type="number" value="3" min="0" step="1"><span class="unit">年</span></div></div>
+        <div class="field"><label>長照第幾年開始</label><div class="input-wrap"><input id="careStartYear" type="number" value="1" min="1" step="1"><span class="unit">年</span></div></div>
+      </div>
+      <div class="summary-grid" style="margin:16px 0 0;">
+        <div class="metric"><div class="metric-label">醫療預留金</div><div class="metric-value" id="medicalReserve">0 萬</div></div>
+        <div class="metric"><div class="metric-label">長照預留金</div><div class="metric-value" id="careReserve">0 萬</div></div>
+        <div class="metric dark"><div class="metric-label">合計預留金</div><div class="metric-value" id="totalCareReserve">0 萬</div></div>
+        <div class="metric"><div class="metric-label">年現金流需求</div><div class="metric-value" id="careAnnualNeed">0 萬</div></div>
+        <div class="metric"><div class="metric-label">預留覆蓋年數</div><div class="metric-value" id="coveredYears">0 年</div></div>
+        <div class="metric"><div class="metric-label">長照開始年</div><div class="metric-value" id="careStartDisplay">第 1 年</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">目前財務狀況 <span>資產預測前的資產、負債與現金流摘要</span></div>
+      <div class="status-summary-grid">
+        <div class="metric asset"><div class="metric-label">目前資產總額</div><div class="metric-value" id="statusAssets">0 萬</div><div class="metric-note" id="statusAssetsNote">會計資產 + 投資本金</div></div>
+        <div class="metric liability"><div class="metric-label">目前負債總額</div><div class="metric-value" id="statusLiabilities">0 萬</div></div>
+        <div class="metric dark"><div class="metric-label">目前淨資產</div><div class="metric-value" id="statusNetWorth">0 萬</div></div>
+        <div class="metric"><div class="metric-label">第一年一般負債還款</div><div class="metric-value" id="statusDebtPayment">0 萬</div></div>
+        <div class="metric"><div class="metric-label">理財貸款年息</div><div class="metric-value" id="statusLoanInterest">0 萬</div></div>
+        <div class="metric"><div class="metric-label">投資稅後收益/年</div><div class="metric-value" id="statusAfterTaxIncome">0 萬</div></div>
+        <div class="metric"><div class="metric-label">不列入預測資產</div><div class="metric-value" id="statusNonForecastAssets">0 萬</div></div>
+      </div>
+    </section>
+
+    <section class="panel forecast-panel">
+      <div class="panel-title">資產預測表 <span>起始資產不含投資本金與保單價值準備金</span></div>
+      <div class="form-grid">
+        <div class="field"><label>每月新增投入</label><div class="input-wrap"><input id="monthlyContribution" type="number" value="3" min="0" step="0.1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>目標資產</label><div class="input-wrap"><input id="targetAsset" type="number" value="1000" min="1" step="1"><span class="unit">萬</span></div></div>
+        <div class="field"><label>通膨率</label><div class="input-wrap"><input id="inflationRate" type="number" value="2" min="0" max="20" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field"><label>預測年限</label><div class="input-wrap"><input id="projectionYears" type="number" value="30" min="1" max="60" step="1"><span class="unit">年</span></div></div>
+      </div>
+      <div class="summary-grid" style="margin:16px 0;">
+        <div class="metric dark"><div class="metric-label">預計達標年</div><div class="metric-value" id="forecastReach">未達標</div></div>
+        <div class="metric"><div class="metric-label">期末資產</div><div class="metric-value" id="forecastFinal">0 萬</div></div>
+        <div class="metric"><div class="metric-label">稅後投資收益/年</div><div class="metric-value" id="forecastAfterTaxIncome">0 萬</div></div>
+        <div class="metric"><div class="metric-label">理財貸款年息</div><div class="metric-value" id="forecastLoanInterest">0 萬</div></div>
+        <div class="metric"><div class="metric-label">期末目標</div><div class="metric-value" id="forecastTarget">0 萬</div></div>
+      </div>
+      <div class="chart" id="forecastChart"></div>
+      <div class="toolbar">
+        <button class="btn-soft" type="button" id="copyTableBtn">複製預測表</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>年份</th>
+              <th>期初可配置資產</th>
+              <th>新增投入</th>
+              <th>稅後投資收益</th>
+              <th>投資贖回本金</th>
+              <th>醫療長照支出</th>
+              <th>一般負債還款</th>
+              <th>理財貸款利息</th>
+              <th>期末資產</th>
+              <th>通膨後目標</th>
+              <th>距離目標</th>
+            </tr>
+          </thead>
+          <tbody id="forecastRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="contact">
+      頁面為規劃試算工具，不是稅務申報意見。需要把實際保單、基金配息通知與貸款資料一起拆解，可 <a href="booking.html">預約免費諮詢</a>。
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      debts: [],
+      investments: [],
+      forecastRows: []
+    };
+
+    const defaultDebts = [
+      { name: '信貸', monthlyPayment: 0, remainingMonths: 0 },
+      { name: '車貸', monthlyPayment: 0, remainingMonths: 0 },
+      { name: '房貸', monthlyPayment: 0, remainingMonths: 0 }
+    ];
+
+    const defaultInvestments = [
+      { name: '台股 ETF 股利', type: 'tw_stock', principal: 150, rate: 5, interestStartDate: '', redemptionDate: '' },
+      { name: '境內基金配息', type: 'domestic_fund', principal: 80, rate: 4, interestStartDate: '', redemptionDate: '' },
+      { name: '境外基金配息', type: 'offshore_fund', principal: 120, rate: 5, interestStartDate: '', redemptionDate: '' }
+    ];
+
+    function n(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function money(value) {
+      return `${Number(value).toLocaleString('zh-TW', { maximumFractionDigits: 1 })} 萬`;
+    }
+
+    function percent(value) {
+      return `${Number(value).toLocaleString('zh-TW', { maximumFractionDigits: 1 })}%`;
+    }
+
+    function incomeTaxInfo(taxableIncome) {
+      const brackets = [
+        { floor: 0, ceiling: 59, rate: 0.05, deduction: 0 },
+        { floor: 59, ceiling: 133, rate: 0.12, deduction: 4.13 },
+        { floor: 133, ceiling: 266, rate: 0.20, deduction: 14.77 },
+        { floor: 266, ceiling: 498, rate: 0.30, deduction: 41.37 },
+        { floor: 498, ceiling: Infinity, rate: 0.40, deduction: 91.17 }
+      ];
+      const income = Math.max(0, taxableIncome);
+      const bracket = brackets.find(item => income <= item.ceiling) || brackets[brackets.length - 1];
+      return {
+        rate: bracket.rate,
+        tax: Math.max(0, income * bracket.rate - bracket.deduction)
+      };
+    }
+
+    function incrementalIncomeTax(baseIncome, addedIncome) {
+      if (addedIncome <= 0) return 0;
+      return incomeTaxInfo(baseIncome + addedIncome).tax - incomeTaxInfo(baseIncome).tax;
+    }
+
+    function todayMidnight() {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function yearsUntil(dateString) {
+      if (!dateString) return null;
+      const due = new Date(`${dateString}T00:00:00`);
+      const diff = due.getTime() - todayMidnight().getTime();
+      return Math.max(0, Math.ceil(diff / (365.25 * 24 * 60 * 60 * 1000)));
+    }
+
+    function sumSelector(selector) {
+      return [...document.querySelectorAll(selector)].reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+    }
+
+    function addInvestment(item = {}) {
+      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+      state.investments.push({
+        id,
+        name: item.name || '',
+        type: item.type || 'domestic_fund',
+        principal: item.principal || 0,
+        rate: item.rate || 0,
+        interestStartDate: item.interestStartDate || '',
+        redemptionDate: item.redemptionDate || item.guaranteeDate || ''
+      });
+      renderInvestmentRows();
+      recalcAll();
+    }
+
+    function addDebt(item = {}) {
+      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+      state.debts.push({
+        id,
+        name: item.name || '',
+        monthlyPayment: item.monthlyPayment || 0,
+        remainingMonths: item.remainingMonths || 0
+      });
+      renderDebtRows();
+      recalcAll();
+    }
+
+    function removeDebt(id) {
+      state.debts = state.debts.filter(item => item.id !== id);
+      renderDebtRows();
+      recalcAll();
+    }
+
+    function updateDebt(id, key, value) {
+      const item = state.debts.find(row => row.id === id);
+      if (!item) return;
+      item[key] = key === 'name' ? value : (parseFloat(value) || 0);
+      recalcAll();
+    }
+
+    function renderDebtRows() {
+      const tbody = document.getElementById('debtRows');
+      tbody.innerHTML = '';
+      state.debts.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input class="name-input" value="${item.name}" data-key="name"></td>
+          <td><input type="number" min="0" step="0.1" value="${item.monthlyPayment}" data-key="monthlyPayment"></td>
+          <td><input type="number" min="0" step="1" value="${item.remainingMonths}" data-key="remainingMonths"></td>
+          <td data-result="debtTotal">0 萬</td>
+          <td data-result="annualPayment">0 萬</td>
+          <td><button class="btn-danger" type="button">刪除</button></td>
+        `;
+        tr.querySelectorAll('input').forEach(input => {
+          input.addEventListener('input', event => updateDebt(item.id, event.target.dataset.key, event.target.value));
+        });
+        tr.querySelector('button').addEventListener('click', () => removeDebt(item.id));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateDebtResults() {
+      const trList = [...document.querySelectorAll('#debtRows tr')];
+      state.debts.forEach((row, index) => {
+        const tr = trList[index];
+        if (!tr) return;
+        tr.querySelector('[data-result="debtTotal"]').textContent = money(row.monthlyPayment * row.remainingMonths);
+        tr.querySelector('[data-result="annualPayment"]').textContent = money(row.monthlyPayment * Math.min(12, row.remainingMonths));
+      });
+    }
+
+    function generalDebtPaymentForYear(year) {
+      return state.debts.reduce((sum, debt) => {
+        const monthsPaidBefore = (year - 1) * 12;
+        const remainingAtYearStart = Math.max(0, debt.remainingMonths - monthsPaidBefore);
+        return sum + debt.monthlyPayment * Math.min(12, remainingAtYearStart);
+      }, 0);
+    }
+
+    function medicalCareExpenseForYear(year) {
+      const medicalExpense = year <= n('medicalYears') ? n('medicalAnnual') : 0;
+      const careStart = Math.max(1, Math.round(n('careStartYear')));
+      const careEnd = careStart + Math.max(0, Math.round(n('careYears'))) - 1;
+      const careExpense = year >= careStart && year <= careEnd ? n('careAnnual') : 0;
+      return medicalExpense + careExpense;
+    }
+
+    function removeInvestment(id) {
+      state.investments = state.investments.filter(item => item.id !== id);
+      renderInvestmentRows();
+      recalcAll();
+    }
+
+    function updateInvestment(id, key, value) {
+      const item = state.investments.find(row => row.id === id);
+      if (!item) return;
+      item[key] = key === 'principal' || key === 'rate' ? (parseFloat(value) || 0) : value;
+      recalcAll();
+    }
+
+    function renderInvestmentRows() {
+      const tbody = document.getElementById('investmentRows');
+      tbody.innerHTML = '';
+      state.investments.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input class="name-input" value="${item.name}" data-key="name"></td>
+          <td>
+            <select data-key="type">
+              <option value="domestic_fund"${item.type === 'domestic_fund' ? ' selected' : ''}>境內基金</option>
+              <option value="offshore_fund"${item.type === 'offshore_fund' ? ' selected' : ''}>境外基金</option>
+              <option value="tw_stock"${item.type === 'tw_stock' ? ' selected' : ''}>股票股利</option>
+              <option value="overseas_income"${item.type === 'overseas_income' ? ' selected' : ''}>海外所得</option>
+              <option value="annuity_insurance"${item.type === 'annuity_insurance' ? ' selected' : ''}>保險/年金（國內保單）</option>
+            </select>
+          </td>
+          <td><input type="number" min="0" step="1" value="${item.principal}" data-key="principal"></td>
+          <td><input class="rate-input" type="number" min="0" step="0.1" value="${item.rate}" data-key="rate"></td>
+          <td><input type="date" value="${item.interestStartDate}" data-key="interestStartDate"></td>
+          <td data-result="interestStart">第 1 年</td>
+          <td data-result="income">0 萬</td>
+          <td><input type="date" value="${item.redemptionDate}" data-key="redemptionDate"></td>
+          <td data-result="redemption">未設定</td>
+          <td><button class="btn-danger" type="button">刪除</button></td>
+        `;
+        tr.querySelectorAll('input, select').forEach(input => {
+          input.addEventListener('input', event => updateInvestment(item.id, event.target.dataset.key, event.target.value));
+        });
+        tr.querySelector('button').addEventListener('click', () => removeInvestment(item.id));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function estimateTaxRows() {
+      const domesticBaseIncome = n('domesticTaxableIncome');
+      const otherOverseas = n('otherOverseasIncome');
+      const basicBase = n('basicIncomeBase');
+      const overseasInvestmentIncome = state.investments
+        .filter(item => item.type === 'offshore_fund' || item.type === 'overseas_income')
+        .reduce((sum, item) => sum + item.principal * item.rate / 100, 0);
+      const totalOverseas = otherOverseas + overseasInvestmentIncome;
+      const basicTaxTotal = totalOverseas >= 100
+        ? Math.max(0, basicBase + totalOverseas - 750) * 0.2
+        : 0;
+
+      return state.investments.map(item => {
+        const income = item.principal * item.rate / 100;
+        let tax = 0;
+        let method = '';
+
+        if (item.type === 'domestic_fund') {
+          tax = Math.max(0, incrementalIncomeTax(domesticBaseIncome, income));
+          method = '國內綜所稅級距差額';
+        }
+
+        if (item.type === 'tw_stock') {
+          const combined = Math.max(0, incrementalIncomeTax(domesticBaseIncome, income) - income * 0.085);
+          const separate = income * 0.28;
+          tax = Math.min(combined, separate);
+          method = '股利二擇一估算';
+        }
+
+        if (item.type === 'offshore_fund' || item.type === 'overseas_income') {
+          tax = overseasInvestmentIncome > 0 ? basicTaxTotal * (income / overseasInvestmentIncome) : 0;
+          method = totalOverseas >= 100 ? '基本稅額估算' : '未達100萬門檻';
+        }
+
+        if (item.type === 'annuity_insurance') {
+          tax = 0;
+          method = '國內保單給付/解約差額待確認';
+        }
+
+        return { ...item, income, tax, afterTax: income - tax, method };
+      });
+    }
+
+    function updateInvestmentResults(rows) {
+      const trList = [...document.querySelectorAll('#investmentRows tr')];
+      rows.forEach((row, index) => {
+        const tr = trList[index];
+        if (!tr) return;
+        const interestStartYears = yearsUntil(row.interestStartDate);
+        tr.querySelector('[data-result="interestStart"]').textContent = interestStartYears === null
+          ? '第 1 年'
+          : interestStartYears === 0 ? '今年' : `${interestStartYears} 年後`;
+        tr.querySelector('[data-result="income"]').textContent = money(row.income);
+        const redemptionYears = yearsUntil(row.redemptionDate);
+        tr.querySelector('[data-result="redemption"]').textContent = redemptionYears === null
+          ? '未設定'
+          : redemptionYears === 0 ? '今年' : `${redemptionYears} 年`;
+      });
+    }
+
+    function taxTypeLabel(type) {
+      if (type === 'domestic_fund') return '境內基金';
+      if (type === 'offshore_fund') return '境外基金';
+      if (type === 'tw_stock') return '股票股利';
+      if (type === 'overseas_income') return '海外所得';
+      if (type === 'annuity_insurance') return '保險/年金（國內保單）';
+      return type;
+    }
+
+    function renderTaxRows(rows) {
+      const tbody = document.getElementById('taxRows');
+      tbody.innerHTML = '';
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.name || '-'}</td>
+          <td>${taxTypeLabel(row.type)}</td>
+          <td>${money(row.principal)}</td>
+          <td>${money(row.income)}</td>
+          <td>${row.method}</td>
+          <td>${money(row.tax)}</td>
+          <td>${money(row.afterTax)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const principal = rows.reduce((sum, row) => sum + row.principal, 0);
+      const gross = rows.reduce((sum, row) => sum + row.income, 0);
+      const tax = rows.reduce((sum, row) => sum + row.tax, 0);
+      const afterTax = rows.reduce((sum, row) => sum + row.afterTax, 0);
+      const offshoreIncome = rows
+        .filter(row => row.type === 'offshore_fund' || row.type === 'overseas_income')
+        .reduce((sum, row) => sum + row.income, 0);
+      const domesticInfo = incomeTaxInfo(n('domesticTaxableIncome'));
+      document.getElementById('domesticTaxRate').textContent = percent(domesticInfo.rate * 100);
+      document.getElementById('domesticTaxAmount').textContent = money(domesticInfo.tax);
+      document.getElementById('taxPrincipalTotal').textContent = money(principal);
+      document.getElementById('taxGrossIncome').textContent = money(gross);
+      document.getElementById('taxTotal').textContent = money(tax);
+      document.getElementById('taxAfterIncome').textContent = money(afterTax);
+      document.getElementById('taxOverseasIncome').textContent = money(offshoreIncome + n('otherOverseasIncome'));
+    }
+
+    function recalcAll() {
+      const investmentPrincipal = state.investments.reduce((sum, item) => sum + item.principal, 0);
+      const generalDebtTotal = state.debts.reduce((sum, item) => sum + item.monthlyPayment * item.remainingMonths, 0);
+      const accountingAssets = sumSelector('[data-asset]');
+      const nonForecastAssets = sumSelector('[data-nonforecast]');
+      const assets = accountingAssets + investmentPrincipal;
+      const loanPrincipal = n('loanPrincipal');
+      const liabilities = generalDebtTotal + loanPrincipal;
+      const netWorth = assets - liabilities;
+
+      const medicalReserve = n('medicalAnnual') * n('medicalYears');
+      const careReserve = n('careAnnual') * n('careYears');
+      const totalCareReserve = medicalReserve + careReserve;
+      const deployable = netWorth - totalCareReserve;
+
+      document.getElementById('sumAssets').textContent = money(assets);
+      document.getElementById('sumAssetsNote').textContent = `會計資產 ${money(accountingAssets)} + 投資本金 ${money(investmentPrincipal)}`;
+      document.getElementById('sumLiabilities').textContent = money(liabilities);
+      document.getElementById('sumNetWorth').textContent = money(netWorth);
+      document.getElementById('sumCareReserve').textContent = money(totalCareReserve);
+      document.getElementById('sumDeployable').textContent = money(deployable);
+
+      document.getElementById('medicalReserve').textContent = money(medicalReserve);
+      document.getElementById('careReserve').textContent = money(careReserve);
+      document.getElementById('totalCareReserve').textContent = money(totalCareReserve);
+      document.getElementById('careAnnualNeed').textContent = money(n('medicalAnnual') + n('careAnnual'));
+      document.getElementById('coveredYears').textContent = `${Math.max(n('medicalYears'), n('careYears')).toLocaleString('zh-TW')} 年`;
+      document.getElementById('careStartDisplay').textContent = `第 ${Math.max(1, Math.round(n('careStartYear')))} 年`;
+
+      const loanLimit = n('loanLimit');
+      const loanRate = n('loanRate') / 100;
+      const monthlyInterest = loanPrincipal * loanRate / 12;
+      const annualInterest = loanPrincipal * loanRate;
+      const usage = loanLimit > 0 ? loanPrincipal / loanLimit * 100 : 0;
+      const dueYears = yearsUntil(document.getElementById('loanDueDate').value);
+      document.getElementById('loanMonthlyInterest').textContent = money(monthlyInterest);
+      document.getElementById('loanAnnualInterest').textContent = money(annualInterest);
+      document.getElementById('loanUsage').textContent = percent(usage);
+      document.getElementById('loanDueStatus').textContent = dueYears === null ? '未設定' : dueYears === 0 ? '今年到期' : `${dueYears} 年內`;
+      document.getElementById('loanFinalPayment').textContent = money(monthlyInterest);
+
+      updateDebtResults();
+      const taxRows = estimateTaxRows();
+      updateInvestmentResults(taxRows);
+      renderTaxRows(taxRows);
+      const afterTaxIncome = taxRows.reduce((sum, row) => sum + row.afterTax, 0);
+      document.getElementById('statusAssets').textContent = money(assets);
+      document.getElementById('statusAssetsNote').textContent = `會計資產 ${money(accountingAssets)} + 投資本金 ${money(investmentPrincipal)}`;
+      document.getElementById('statusLiabilities').textContent = money(liabilities);
+      document.getElementById('statusNetWorth').textContent = money(netWorth);
+      document.getElementById('statusDebtPayment').textContent = money(generalDebtPaymentForYear(1));
+      document.getElementById('statusLoanInterest').textContent = money(annualInterest);
+      document.getElementById('statusAfterTaxIncome').textContent = money(afterTaxIncome);
+      document.getElementById('statusNonForecastAssets').textContent = money(nonForecastAssets);
+      const forecastStartValue = deployable - investmentPrincipal - nonForecastAssets;
+      renderForecast(forecastStartValue, taxRows, annualInterest);
+    }
+
+    function renderForecast(startValue, investmentRows, annualLoanInterest) {
+      const annualContribution = n('monthlyContribution') * 12;
+      const target = n('targetAsset');
+      const inflation = n('inflationRate') / 100;
+      const years = Math.max(1, Math.min(60, Math.round(n('projectionYears'))));
+      const forecastRows = [];
+      let value = startValue;
+      let reachYear = null;
+
+      for (let year = 1; year <= years; year += 1) {
+        const beginning = value;
+        const activeInvestmentIncome = investmentRows.reduce((sum, row) => {
+          const interestStartYear = Math.max(1, yearsUntil(row.interestStartDate) ?? 1);
+          const redemptionYear = yearsUntil(row.redemptionDate);
+          const redemptionLimit = redemptionYear === null ? Infinity : Math.max(1, redemptionYear);
+          return year >= interestStartYear && year <= redemptionLimit ? sum + row.afterTax : sum;
+        }, 0);
+        const redeemedPrincipal = investmentRows.reduce((sum, row) => {
+          const redemptionYear = yearsUntil(row.redemptionDate);
+          return redemptionYear !== null && year === Math.max(1, redemptionYear) ? sum + row.principal : sum;
+        }, 0);
+        const medicalCareExpense = medicalCareExpenseForYear(year);
+        const generalDebtPayment = generalDebtPaymentForYear(year);
+        const endValue = beginning + annualContribution + activeInvestmentIncome + redeemedPrincipal - medicalCareExpense - generalDebtPayment - annualLoanInterest;
+        const adjustedTarget = target * Math.pow(1 + inflation, year);
+        const gap = endValue - adjustedTarget;
+        if (reachYear === null && gap >= 0) reachYear = year;
+        forecastRows.push({ year, beginning, annualContribution, afterTaxIncome: activeInvestmentIncome, redeemedPrincipal, medicalCareExpense, generalDebtPayment, annualLoanInterest, endValue, adjustedTarget, gap, reached: reachYear === year });
+        value = endValue;
+      }
+
+      state.forecastRows = forecastRows;
+      const last = forecastRows[forecastRows.length - 1];
+      document.getElementById('forecastReach').textContent = reachYear ? `第 ${reachYear} 年` : '未達標';
+      document.getElementById('forecastFinal').textContent = money(last.endValue);
+      document.getElementById('forecastAfterTaxIncome').textContent = money(forecastRows[0]?.afterTaxIncome || 0);
+      document.getElementById('forecastLoanInterest').textContent = money(annualLoanInterest);
+      document.getElementById('forecastTarget').textContent = money(last.adjustedTarget);
+      renderForecastChart(forecastRows, reachYear);
+      renderForecastTable(forecastRows);
+    }
+
+    function renderForecastChart(rows, reachYear) {
+      const chart = document.getElementById('forecastChart');
+      chart.innerHTML = '';
+      const max = Math.max(...rows.map(row => row.endValue), 1);
+      const step = Math.max(1, Math.ceil(rows.length / 18));
+      rows.forEach(row => {
+        if (row.year !== 1 && row.year !== rows.length && row.year !== reachYear && row.year % step !== 0) return;
+        const bar = document.createElement('div');
+        bar.className = `bar${row.year === reachYear ? ' reached' : ''}`;
+        bar.style.height = `${Math.max(4, Math.abs(row.endValue) / max * 100)}%`;
+        bar.title = `第 ${row.year} 年：${money(row.endValue)}`;
+        bar.innerHTML = `<span>${row.year}</span>`;
+        chart.appendChild(bar);
+      });
+    }
+
+    function renderForecastTable(rows) {
+      const tbody = document.getElementById('forecastRows');
+      tbody.innerHTML = '';
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        if (row.reached) tr.classList.add('forecast-reached');
+        tr.innerHTML = `
+          <td>第 ${row.year} 年${row.reached ? ' 達標' : ''}</td>
+          <td>${money(row.beginning)}</td>
+          <td>${money(row.annualContribution)}</td>
+          <td>${money(row.afterTaxIncome)}</td>
+          <td>${row.redeemedPrincipal > 0 ? money(row.redeemedPrincipal) : '-'}</td>
+          <td>${row.medicalCareExpense > 0 ? money(row.medicalCareExpense) : '-'}</td>
+          <td>${row.generalDebtPayment > 0 ? money(row.generalDebtPayment) : '-'}</td>
+          <td>${money(row.annualLoanInterest)}</td>
+          <td>${money(row.endValue)}</td>
+          <td>${money(row.adjustedTarget)}</td>
+          <td>${money(row.gap)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function copyForecastTable() {
+      const header = ['年份', '期初可配置資產', '新增投入', '稅後投資收益', '投資贖回本金', '醫療長照支出', '一般負債還款', '理財貸款利息', '期末資產', '通膨後目標', '距離目標'];
+      const lines = state.forecastRows.map(row => [
+        row.year,
+        row.beginning.toFixed(1),
+        row.annualContribution.toFixed(1),
+        row.afterTaxIncome.toFixed(1),
+        row.redeemedPrincipal.toFixed(1),
+        row.medicalCareExpense.toFixed(1),
+        row.generalDebtPayment.toFixed(1),
+        row.annualLoanInterest.toFixed(1),
+        row.endValue.toFixed(1),
+        row.adjustedTarget.toFixed(1),
+        row.gap.toFixed(1)
+      ].join('\t'));
+      navigator.clipboard.writeText([header.join('\t'), ...lines].join('\n')).then(() => {
+        const btn = document.getElementById('copyTableBtn');
+        btn.textContent = '已複製';
+        setTimeout(() => { btn.textContent = '複製預測表'; }, 1200);
+      });
+    }
+
+    function updateClientName() {
+      const name = document.getElementById('clientName').value.trim();
+      document.getElementById('clientNameDisplay').textContent = `客戶：${name || '未填寫'}`;
+    }
+
+    function initDueDate() {
+      const due = new Date();
+      due.setFullYear(due.getFullYear() + 20);
+      document.getElementById('loanDueDate').value = due.toISOString().slice(0, 10);
+    }
+
+    document.getElementById('loanPrincipal').addEventListener('input', recalcAll);
+    document.getElementById('addDebtBtn').addEventListener('click', () => addDebt({ name: '新負債', monthlyPayment: 0, remainingMonths: 0 }));
+    document.getElementById('addInvestmentBtn').addEventListener('click', () => addInvestment({ name: '新投資項目', principal: 0, rate: 0 }));
+    document.getElementById('copyTableBtn').addEventListener('click', copyForecastTable);
+    document.getElementById('copyTableTopBtn').addEventListener('click', copyForecastTable);
+
+    document.querySelectorAll('input, select').forEach(input => {
+      if (input.id === 'loanPrincipal') return;
+      input.addEventListener('input', recalcAll);
+    });
+
+    initDueDate();
+    defaultDebts.forEach(addDebt);
+    defaultInvestments.forEach(addInvestment);
+    recalcAll();
+  </script>
+</body>
+</html>

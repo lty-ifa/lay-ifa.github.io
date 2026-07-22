@@ -60,7 +60,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: repeat(3, minmax(150px, 230px)) minmax(0, 1fr);
+      grid-template-columns: repeat(3, minmax(150px, 230px));
       gap: 12px;
       align-items: end;
       padding: 18px;
@@ -78,8 +78,6 @@
       border: 1px solid var(--line);
       border-radius: 9px;
     }
-    .official-link { justify-self: end; color: var(--gold-light); font-size: 12px; text-underline-offset: 3px; }
-
     .scoreboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
     .score-card { padding: 16px 18px; background: rgba(16,34,56,.76); border: 1px solid var(--line); border-radius: 13px; }
     .score-label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; }
@@ -200,7 +198,6 @@
       .hero { grid-template-columns: 1fr; padding: 22px 18px; }
       .rule-pill { justify-self: start; white-space: normal; }
       .controls { grid-template-columns: 1fr; }
-      .official-link { justify-self: start; }
       .scoreboard { grid-template-columns: 1fr; }
       .answers { grid-template-columns: 1fr; padding: 12px; }
       .answer-row { grid-template-columns: 34px repeat(4, 1fr); }
@@ -264,7 +261,6 @@
           <option value="c">第 51～60 題</option>
         </select>
       </label>
-      <a class="official-link" id="officialLink" href="#" target="_blank" rel="noreferrer">另開題本 PDF ↗</a>
     </section>
 
     <section class="workspace">
@@ -380,7 +376,6 @@
 
     function updatePaper() {
       const exam = currentExam();
-      document.getElementById('officialLink').href = `family-trust-papers/${state.edition}-${state.subject === 'section1' ? 'section1' : 'section2'}.pdf`;
       document.getElementById('paperTitle').textContent = `第 ${state.edition} 期｜${subjectNames[state.subject]}`;
       renderQuestion();
     }

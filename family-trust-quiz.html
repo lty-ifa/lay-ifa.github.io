@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="理財規劃人員專業能力測驗歷屆試題練習與自動評分">
-  <title>理財規劃人員歷屆試題練習</title>
+  <meta name="description" content="家族信託規劃顧問師資格測驗歷屆試題練習與自動評分">
+  <title>家族信託規劃顧問師歷屆試題練習</title>
   <style>
     :root {
       --navy: #071220;
@@ -218,7 +218,7 @@
     <form class="access-card" id="accessForm">
       <div class="eyebrow">PRIVATE TOOL · 限制進入</div>
       <h2 id="accessTitle">請輸入密碼</h2>
-      <p>此頁為理財規劃人員歷屆試題練習工具，請輸入密碼後繼續。</p>
+      <p>此頁為家族信託規劃顧問師歷屆試題練習工具，請輸入密碼後繼續。</p>
       <div class="password-row">
         <input id="passwordInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="輸入密碼" required autofocus>
         <button class="btn btn-primary" type="submit">進入</button>
@@ -237,8 +237,8 @@
     <header class="hero">
       <div>
         <div class="eyebrow">EXAM PRACTICE · 歷屆試題練習</div>
-        <h1>理財規劃人員測驗</h1>
-        <p class="lead">選擇屆次、科目與快速題組逐題練習。每題選完會立即顯示正誤與官方答案，本版不計算總分；舊題涉及的法規可能已修正，請以現行法規為準。</p>
+        <h1>家族信託規劃顧問師測驗</h1>
+        <p class="lead">選擇期次、節次與快速題組逐題練習。每題選完會立即顯示正誤與官方答案，本版不計算總分；舊題涉及的法規可能已修正，請以現行法規為準。</p>
       </div>
       <div class="rule-pill">25 題快速練習｜不計分</div>
     </header>
@@ -246,21 +246,22 @@
     <section class="controls" aria-label="試卷設定">
       <label>屆次
         <select id="editionSelect">
-          <option value="48">第 48 屆</option>
-          <option value="47">第 47 屆</option>
-          <option value="46">第 46 屆</option>
+          <option value="7">第 7 期</option>
+          <option value="6">第 6 期</option>
+          <option value="5">第 5 期</option>
         </select>
       </label>
-      <label>科目
+      <label>節次
         <select id="subjectSelect">
-          <option value="tools">理財工具</option>
-          <option value="practice">理財規劃實務</option>
+          <option value="section1">第一節</option>
+          <option value="section2">第二節</option>
         </select>
       </label>
       <label>快速題組
         <select id="groupSelect">
           <option value="a">第 1～25 題</option>
           <option value="b">第 26～50 題</option>
+          <option value="c">第 51～60 題</option>
         </select>
       </label>
       <a class="official-link" id="officialLink" href="#" target="_blank" rel="noreferrer">另開題本 PDF ↗</a>
@@ -269,7 +270,7 @@
     <section class="workspace">
       <article class="paper">
         <div class="panel-head">
-          <div class="panel-title" id="paperTitle">第 48 屆｜理財工具</div>
+          <div class="panel-title" id="paperTitle">第 7 期｜第一節</div>
           <div class="panel-note">逐題練習模式</div>
         </div>
         <div class="question-body">
@@ -301,12 +302,12 @@
       </aside>
     </section>
 
-    <p class="legal-note">本工具的題目來源為台灣金融研訓院公開的官方歷屆試題。官方說明歷屆解答以當時法規為準，如法規修正請自行更正。本頁不儲存作答紀錄，重新整理頁面後資料會消失。</p>
+    <p class="legal-note">本工具的題目來源為台灣金融研訓院公開的家族信託規劃顧問師官方歷屆試題。官方說明歷屆解答以當時法規為準，如法規修正請自行更正。本頁不儲存作答紀錄，重新整理頁面後資料會消失。</p>
   </main>
 
-  <script src="exam-questions.js"></script>
+  <script src="family-trust-questions.js"></script>
   <script>
-    const ACCESS_HASH = '70425373a1836d6d0390dc6fef838a468717fba7776d66065a5043488f9f041b';
+    const ACCESS_HASH = '8dca256af296945f77bc0147f78e57f4d7f9e91dcbdecfa49d7a37d8c2df270c';
 
     async function sha256(value) {
       const bytes = new TextEncoder().encode(value);
@@ -317,10 +318,10 @@
     function grantAccess() {
       document.body.classList.add('access-granted');
       document.getElementById('contentPage').removeAttribute('inert');
-      sessionStorage.setItem('financialPlannerQuizAccess', 'granted');
+      sessionStorage.setItem('familyTrustQuizAccess', 'granted');
     }
 
-    if (sessionStorage.getItem('financialPlannerQuizAccess') === 'granted') grantAccess();
+    if (sessionStorage.getItem('familyTrustQuizAccess') === 'granted') grantAccess();
 
     document.getElementById('accessForm').addEventListener('submit', async event => {
       event.preventDefault();
@@ -340,41 +341,9 @@
       }
     });
 
-    const exams = {
-      48: {
-        tools: {
-          pdf: 'exam-papers/48-tools.pdf',
-          answers: [4,4,2,3,3,3,1,3,2,1,3,3,3,4,1,4,1,4,2,2,3,4,3,3,3,4,2,2,1,2,1,2,3,3,4,3,2,1,1,1,4,3,3,4,4,4,2,4,3,2]
-        },
-        practice: {
-          pdf: 'exam-papers/48-practice.pdf',
-          answers: [4,2,2,3,3,2,2,4,3,3,3,2,1,2,1,2,2,3,2,2,1,2,4,4,3,3,2,3,1,4,4,4,4,3,4,3,3,4,4,2,3,2,1,3,1,2,3,4,4,1]
-        }
-      },
-      47: {
-        tools: {
-          pdf: 'exam-papers/47-tools.pdf',
-          answers: [1,2,1,1,1,3,3,4,1,4,3,2,1,2,3,3,2,3,4,4,4,3,2,3,1,2,3,3,2,1,1,1,2,3,1,4,4,4,1,2,3,1,3,3,3,4,1,2,1,3]
-        },
-        practice: {
-          pdf: 'exam-papers/47-practice.pdf',
-          answers: [4,2,1,1,4,4,4,4,2,3,4,2,4,4,1,3,3,4,1,1,1,2,3,1,3,4,1,2,2,1,3,1,3,3,3,4,3,2,3,3,4,4,4,1,2,3,4,3,2,3]
-        }
-      },
-      46: {
-        tools: {
-          pdf: 'exam-papers/46-tools.pdf',
-          answers: [4,2,3,3,1,4,1,2,4,4,3,2,3,1,3,[2,3],3,3,4,3,1,1,4,4,3,1,1,2,2,1,1,3,4,4,3,3,1,4,3,2,3,2,2,3,1,3,1,1,3,1]
-        },
-        practice: {
-          pdf: 'exam-papers/46-practice.pdf',
-          answers: [1,2,1,3,3,1,4,1,1,4,4,3,3,4,3,4,3,3,1,3,4,4,2,3,4,4,4,2,2,3,2,2,4,[3,4],3,2,1,3,4,3,3,2,4,1,2,3,3,3,2,2]
-        }
-      }
-    };
-
-    const subjectNames = { tools: '理財工具', practice: '理財規劃實務' };
-    const state = { edition: '48', subject: 'tools', group: 'a', currentQuestion: 1 };
+    const exams = window.FAMILY_TRUST_DATA;
+    const subjectNames = { section1: '第一節', section2: '第二節' };
+    const state = { edition: '7', subject: 'section1', group: 'a', currentQuestion: 1 };
     const editionSelect = document.getElementById('editionSelect');
     const subjectSelect = document.getElementById('subjectSelect');
     const groupSelect = document.getElementById('groupSelect');
@@ -382,9 +351,9 @@
     const form = document.getElementById('answerForm');
 
     function currentQuestionNumbers() {
-      return state.group === 'a'
-        ? Array.from({ length: 25 }, (_, index) => index + 1)
-        : Array.from({ length: 25 }, (_, index) => index + 26);
+      if (state.group === 'a') return Array.from({ length: 25 }, (_, index) => index + 1);
+      if (state.group === 'b') return Array.from({ length: 25 }, (_, index) => index + 26);
+      return Array.from({ length: 10 }, (_, index) => index + 51);
     }
 
     function renderAnswerSheet() {
@@ -408,14 +377,14 @@
 
     function updatePaper() {
       const exam = currentExam();
-      document.getElementById('officialLink').href = exam.pdf;
-      document.getElementById('paperTitle').textContent = `第 ${state.edition} 屆｜${subjectNames[state.subject]}`;
+      document.getElementById('officialLink').href = `family-trust-papers/${state.edition}-${state.subject === 'section1' ? 'section1' : 'section2'}.pdf`;
+      document.getElementById('paperTitle').textContent = `第 ${state.edition} 期｜${subjectNames[state.subject]}`;
       renderQuestion();
     }
 
     function renderQuestion() {
       const number = state.currentQuestion;
-      const question = window.EXAM_QUESTIONS[state.edition][state.subject][number - 1];
+      const question = currentExam().questions[number - 1];
       const chosen = form.querySelector(`input[name="q${number}"]:checked`);
       const accepted = currentExam().answers[number - 1];
       const acceptedValues = Array.isArray(accepted) ? accepted : [accepted];

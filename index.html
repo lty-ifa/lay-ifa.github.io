@@ -22,10 +22,11 @@
 
     body {
       min-height: 100vh;
-      color: var(--ink);
+      color: #e9eef5;
       background:
-        radial-gradient(circle at 85% 0%, rgba(200, 169, 107, 0.12), transparent 24rem),
-        var(--paper);
+        radial-gradient(circle at 12% 42%, rgba(40, 107, 128, 0.14), transparent 28rem),
+        radial-gradient(circle at 88% 72%, rgba(200, 169, 107, 0.1), transparent 25rem),
+        #07101d;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
       line-height: 1.6;
     }
@@ -33,11 +34,11 @@
     .hero {
       position: relative;
       overflow: hidden;
-      min-height: 430px;
+      min-height: 560px;
       color: var(--white);
       background:
-        linear-gradient(90deg, rgba(5, 14, 26, 0.96) 0%, rgba(7, 18, 32, 0.9) 38%, rgba(8, 20, 35, 0.58) 70%, rgba(8, 20, 35, 0.72) 100%),
-        url("../出圖/backgrounds/cover_skyline_moscow.jpg") center 54% / cover no-repeat;
+        linear-gradient(90deg, rgba(3, 10, 19, 0.94) 0%, rgba(5, 15, 28, 0.78) 46%, rgba(5, 15, 28, 0.28) 100%),
+        url("../出圖/backgrounds/cover_skyline_moscow.jpg") center 48% / cover no-repeat;
     }
 
     .hero::before {
@@ -45,8 +46,8 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(180deg, rgba(8, 18, 31, 0.08), rgba(8, 18, 31, 0.5)),
-        radial-gradient(circle at 72% 46%, rgba(200, 169, 107, 0.13), transparent 22rem);
+        linear-gradient(180deg, rgba(8, 18, 31, 0.02), rgba(7, 16, 29, 0.84)),
+        repeating-linear-gradient(90deg, transparent 0, transparent calc(25% - 1px), rgba(255,255,255,.035) 25%);
       pointer-events: none;
     }
 
@@ -60,18 +61,19 @@
       border: 1px solid rgba(200, 169, 107, 0.22);
       border-radius: 50%;
       box-shadow: 0 0 0 42px rgba(200, 169, 107, 0.04), 0 0 0 84px rgba(200, 169, 107, 0.025);
+      animation: hero-orbit 8s ease-in-out infinite;
     }
 
     .hero-inner,
     .main-inner {
-      width: min(760px, calc(100% - 36px));
+      width: min(920px, calc(100% - 42px));
       margin: 0 auto;
     }
 
     .hero-inner {
       position: relative;
       z-index: 1;
-      padding: 54px 0 64px;
+      padding: 68px 0 82px;
     }
 
     .brand {
@@ -84,6 +86,7 @@
       font-weight: 700;
       letter-spacing: 0.16em;
       text-transform: uppercase;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
     }
 
     .brand::before {
@@ -94,44 +97,48 @@
     }
 
     h1 {
-      max-width: 620px;
-      margin-bottom: 16px;
-      font-size: clamp(31px, 6vw, 48px);
-      font-weight: 700;
-      line-height: 1.3;
-      letter-spacing: -0.035em;
+      max-width: 760px;
+      margin-bottom: 20px;
+      font-size: clamp(38px, 6.8vw, 66px);
+      font-weight: 760;
+      line-height: 1.18;
+      letter-spacing: -0.045em;
+      text-wrap: balance;
+      text-shadow: 0 4px 34px rgba(0, 0, 0, 0.48);
     }
 
     .hero-copy {
       max-width: 520px;
-      color: #c5cfdb;
-      font-size: 15px;
+      color: #d1dbe7;
+      font-size: 16px;
       letter-spacing: 0.02em;
     }
 
     .expertise {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 18px;
-      margin-top: 25px;
+      gap: 9px;
+      margin-top: 30px;
       color: var(--gold-light);
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.05em;
     }
 
-    .expertise span:not(:last-child)::after {
-      content: "";
-      display: inline-block;
-      width: 3px;
-      height: 3px;
-      margin-left: 18px;
-      vertical-align: middle;
-      border-radius: 50%;
-      background: var(--gold);
+    .expertise span {
+      padding: 7px 12px;
+      background: rgba(7, 18, 31, 0.48);
+      border: 1px solid rgba(229, 210, 168, 0.22);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
     }
 
-    .main-inner { padding: 48px 0 54px; }
+    .main-inner {
+      position: relative;
+      z-index: 2;
+      margin-top: -44px;
+      padding: 0 0 64px;
+    }
 
     .section { margin-bottom: 38px; }
 
@@ -140,7 +147,7 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 14px;
-      color: var(--muted);
+      color: #8f9db0;
       font-size: 11px;
       font-weight: 750;
       letter-spacing: 0.14em;
@@ -150,7 +157,7 @@
       content: "";
       flex: 1;
       height: 1px;
-      background: var(--line);
+      background: linear-gradient(90deg, rgba(200, 169, 107, 0.5), rgba(255,255,255,0.06));
     }
 
     .tools {
@@ -164,38 +171,39 @@
       grid-template-columns: 48px minmax(0, 1fr) 34px;
       align-items: center;
       gap: 18px;
-      min-height: 112px;
-      padding: 22px 24px;
+      min-height: 126px;
+      padding: 25px 27px;
       overflow: hidden;
       color: inherit;
       text-decoration: none;
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      box-shadow: 0 5px 18px rgba(11, 22, 40, 0.045);
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      background: linear-gradient(135deg, rgba(25, 40, 59, 0.92), rgba(12, 25, 42, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.24), inset 0 1px rgba(255, 255, 255, 0.045);
+      backdrop-filter: blur(16px);
+      transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
     }
 
     .tool-card::before {
       content: "";
       position: absolute;
       inset: 0 auto 0 0;
-      width: 3px;
-      background: var(--gold);
-      transform: scaleY(0);
-      transition: transform 0.2s ease;
+      width: 100%;
+      background: linear-gradient(110deg, transparent 28%, rgba(229, 210, 168, 0.1) 48%, transparent 68%);
+      transform: translateX(-110%);
+      transition: transform 0.65s ease;
     }
 
     .tool-card:hover,
     .tool-card:focus-visible {
       outline: none;
-      transform: translateY(-2px);
-      border-color: rgba(200, 169, 107, 0.72);
-      box-shadow: 0 12px 30px rgba(11, 22, 40, 0.09);
+      transform: translateY(-5px) scale(1.01);
+      border-color: rgba(200, 169, 107, 0.58);
+      box-shadow: 0 24px 54px rgba(0, 0, 0, 0.38), 0 0 28px rgba(200, 169, 107, 0.08);
     }
 
     .tool-card:hover::before,
-    .tool-card:focus-visible::before { transform: scaleY(1); }
+    .tool-card:focus-visible::before { transform: translateX(110%); }
 
     .tool-icon {
       display: grid;
@@ -203,9 +211,10 @@
       width: 48px;
       height: 48px;
       color: var(--gold);
-      background: #f7f3ea;
-      border: 1px solid #e8ddc7;
-      border-radius: 10px;
+      background: rgba(200, 169, 107, 0.1);
+      border: 1px solid rgba(200, 169, 107, 0.32);
+      border-radius: 13px;
+      box-shadow: inset 0 0 20px rgba(200, 169, 107, 0.05);
     }
 
     .tool-icon svg {
@@ -220,14 +229,14 @@
 
     .tool-title {
       margin-bottom: 4px;
-      color: var(--navy);
-      font-size: 17px;
+      color: #f5f7fa;
+      font-size: 18px;
       font-weight: 720;
       letter-spacing: -0.01em;
     }
 
     .tool-desc {
-      color: var(--muted);
+      color: #9daabb;
       font-size: 13px;
       line-height: 1.65;
     }
@@ -237,8 +246,8 @@
       place-items: center;
       width: 30px;
       height: 30px;
-      color: var(--navy-soft);
-      border: 1px solid var(--line);
+      color: var(--gold-light);
+      border: 1px solid rgba(200, 169, 107, 0.28);
       border-radius: 50%;
       font-size: 18px;
       transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
@@ -257,17 +266,22 @@
       font-size: 11px;
     }
 
+    @keyframes hero-orbit {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+      50% { transform: translate3d(-18px, -12px, 0) scale(1.05); opacity: 1; }
+    }
+
     @media (max-width: 600px) {
       .hero {
-        min-height: 430px;
+        min-height: 500px;
         background-position: 43% center;
         background-image:
           linear-gradient(90deg, rgba(5, 14, 26, 0.96) 0%, rgba(7, 18, 32, 0.88) 62%, rgba(8, 20, 35, 0.68) 100%),
           url("../出圖/backgrounds/cover_skyline_moscow.jpg");
       }
-      .hero-inner { padding: 36px 0 46px; }
+      .hero-inner { padding: 42px 0 66px; }
       .brand { margin-bottom: 28px; }
-      .main-inner { padding: 34px 0 42px; }
+      .main-inner { margin-top: -34px; padding: 0 0 42px; }
       .section { margin-bottom: 30px; }
       .tool-card { grid-template-columns: 42px minmax(0, 1fr) 28px; gap: 13px; min-height: 104px; padding: 18px 15px; }
       .tool-icon { width: 42px; height: 42px; }
@@ -278,6 +292,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .hero::after { animation: none; }
       .tool-card,
       .tool-card::before,
       .tool-arrow { transition: none; }
@@ -287,7 +302,7 @@
 <body>
   <header class="hero">
     <div class="hero-inner">
-      <div class="brand">@ely_ifa · Independent Financial Advisor</div>
+      <div class="brand">ELY · INDEPENDENT FINANCIAL ADVISOR</div>
       <h1>自己做的小工具自取，<br>有問題再留言問我。</h1>
       <p class="hero-copy">資產規劃、財務目標與市場資訊工具，選需要的直接使用。</p>
       <div class="expertise">

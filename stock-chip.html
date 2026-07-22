@@ -1,0 +1,1803 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Chip｜台股籌碼雷達</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070b14;
+      --panel: #101827;
+      --ink: #eef6ff;
+      --muted: #91a0b5;
+      --line: #26354a;
+      --green: #35d39a;
+      --red: #ff6b81;
+      --blue: #5bbcff;
+      --amber: #f6c85f;
+      --purple: #9f8cff;
+      --soft-green: #102a24;
+      --soft-red: #2b1820;
+      --soft-blue: #13263a;
+      --soft-amber: #2d2819;
+      --shadow: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+
+    .app {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding: 10px 2px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 42px);
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      color: #181b20;
+    }
+
+    .subline {
+      color: #596273;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .live-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      font: 750 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .live-mark::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .dashboard-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .dashboard-controls h2 {
+      margin: 0;
+      color: #181b20;
+      font-size: 19px;
+      font-weight: 850;
+      letter-spacing: -0.01em;
+    }
+
+    .result-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .dashboard-controls p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 550;
+    }
+
+    .refresh-all {
+      min-width: 180px;
+      background: #1f3a5f;
+      border: 1px solid #1f3a5f;
+      box-shadow: none;
+    }
+
+    .result-section {
+      scroll-margin-top: 18px;
+      margin-top: 20px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      overflow: visible;
+      background: none;
+    }
+
+    .strong-zone {
+      box-shadow: none;
+    }
+
+    .turning-zone {
+      box-shadow: none;
+    }
+
+    .result-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 28px 2px 10px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid #1f3a5f;
+    }
+
+    .result-heading span {
+      color: #6b7280;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .strong-zone .result-title,
+    .turning-zone .result-title { color: #181b20; }
+
+    .strong-zone .rank-no,
+    .turning-zone .rank-no { color: #6b7280; }
+    .turning-zone > .result-heading span { color: #6b7280; }
+
+    .hidden-controls { display: none; }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 16px;
+      position: sticky;
+      top: 14px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 10px 11px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px #e7ebf0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-2.is-single {
+      grid-template-columns: 1fr;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .primary, .secondary {
+      min-height: 44px;
+      border-radius: 9px;
+      padding: 0 14px;
+      cursor: pointer;
+      font-weight: 800;
+      border: 0;
+      color: #fff;
+      transition: filter 0.16s ease, transform 0.16s ease;
+    }
+
+    .primary {
+      background: var(--blue);
+    }
+
+    .secondary {
+      background: #1f3a5f;
+    }
+
+    .action-query { background: var(--blue); }
+    .action-strong { background: var(--green); }
+    .action-turning { background: var(--amber); }
+
+    .primary.is-active,
+    .secondary.is-active {
+      box-shadow: 0 0 0 3px #e7ebf0;
+      filter: brightness(0.95);
+    }
+
+    .mode-form {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .mode-form.is-open {
+      display: block;
+    }
+
+    .mode-title {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .field.is-hidden {
+      display: none;
+    }
+
+    .execute-button {
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .primary:hover:not(:disabled),
+    .secondary:hover:not(:disabled) {
+      filter: brightness(0.94);
+      transform: translateY(-1px);
+    }
+
+    .primary:disabled,
+    .secondary:disabled {
+      cursor: progress;
+    }
+
+    .status {
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      margin-bottom: 12px;
+      min-height: 44px;
+      border-left: 3px solid #1f3a5f;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      min-height: 92px;
+      padding: 14px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+      overflow-wrap: anywhere;
+    }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .neutral { color: var(--muted); }
+
+    .card {
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: none;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      color: #181b20;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.015em;
+    }
+
+    .card-sub {
+      color: #596273;
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 550;
+      margin-top: 5px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge.good {
+      color: var(--green);
+      border-color: #087a55;
+      background: var(--soft-green);
+    }
+
+    .badge.bad {
+      color: var(--red);
+      border-color: #c2414b;
+      background: var(--soft-red);
+    }
+
+    .chip-link {
+      text-decoration: none;
+      color: #1f3a5f;
+      border-color: #d7dce3;
+      background: #f7f7f5;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .cell {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 10px;
+      min-height: 70px;
+    }
+
+    .cell span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .cell strong {
+      display: block;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .signal {
+      border-left: 5px solid var(--blue);
+      background: #ffffff;
+    }
+
+    .signal.good {
+      border-left-color: var(--green);
+      background: #ffffff;
+    }
+
+    .signal.bad {
+      border-left-color: var(--red);
+      background: #ffffff;
+    }
+
+    .context-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .context-box {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 11px;
+    }
+
+    .context-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .context-box strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .context-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .ranking {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rank-row {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border: 2px solid #c8cdd4;
+      border-radius: 7px;
+      padding: 12px;
+      background: #ffffff;
+    }
+
+    .rank-row.strong-detail {
+      grid-template-columns: 54px minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .rank-no {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .rank-main strong,
+    .rank-side strong {
+      display: block;
+    }
+
+    .rank-main > strong {
+      color: #181b20;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 900;
+    }
+
+    .rank-main span,
+    .rank-side span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .strong-grid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .strong-cell {
+      border: 1px solid #e3e3df;
+      border-radius: 6px;
+      padding: 10px;
+      background: #f8f8f6;
+      min-height: 58px;
+    }
+
+    .signal-hero {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .hero-stat {
+      padding: 12px;
+      border: 1px solid #d7dce3;
+      border-radius: 7px;
+      background: #ffffff;
+    }
+
+    .hero-stat.primary-stat {
+      border-left: 4px solid #1f3a5f;
+    }
+
+    .hero-stat span,
+    .group-value span,
+    .financing-row span {
+      display: block;
+      color: #596273;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .hero-stat strong {
+      display: block;
+      font-size: 23px;
+      line-height: 1.2;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .streak-days {
+      color: #ff9f43;
+    }
+
+    .detail-groups {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .detail-group {
+      padding: 10px;
+      border: 1px solid #e3e3df;
+      border-radius: 7px;
+      background: #f8f8f6;
+    }
+
+    .detail-group h4 {
+      margin: 0 0 8px;
+      color: #181b20;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .group-values {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .streak-values {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .turning-groups {
+      grid-template-columns: 3fr 2fr 2fr;
+    }
+
+    .group-value strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .financing-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-top: 1px solid #deded9;
+    }
+
+    .financing-row span { margin: 0; }
+    .financing-row strong { font-size: 13px; }
+
+    .strong-cell > span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .strong-cell strong {
+      display: block;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .strong-split {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .strong-split b {
+      font-size: 14px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 18px;
+      color: var(--muted);
+    }
+
+    /* Dark technology theme */
+    h1,
+    .dashboard-controls h2,
+    .card-title,
+    .rank-main > strong,
+    .detail-group h4 {
+      color: #eef6ff;
+    }
+
+    .subline,
+    .card-sub,
+    .result-heading span,
+    .strong-zone .rank-no,
+    .turning-zone .rank-no,
+    .turning-zone > .result-heading span,
+    .hero-stat span,
+    .group-value span,
+    .financing-row span {
+      color: #91a0b5;
+    }
+
+    .refresh-all,
+    .primary,
+    .secondary {
+      color: #070b14;
+      background: #5bbcff;
+      border-color: #5bbcff;
+      box-shadow: none;
+    }
+
+    .result-heading {
+      border-bottom-color: #5bbcff;
+    }
+
+    .strong-zone .result-title,
+    .turning-zone .result-title {
+      color: #eef6ff;
+    }
+
+    input,
+    .badge,
+    .cell,
+    .context-box,
+    .signal,
+    .signal.good,
+    .signal.bad,
+    .hero-stat {
+      color: #eef6ff;
+      background: #101827;
+      border-color: #26354a;
+    }
+
+    input:focus,
+    .primary.is-active,
+    .secondary.is-active {
+      box-shadow: 0 0 0 3px #13263a;
+    }
+
+    .status {
+      border-left-color: #5bbcff;
+    }
+
+    .badge.good {
+      color: #35d39a;
+      border-color: #35d39a;
+      background: #102a24;
+    }
+
+    .badge.bad {
+      color: #ff6b81;
+      border-color: #ff6b81;
+      background: #2b1820;
+    }
+
+    .chip-link {
+      color: #5bbcff;
+      border-color: #5bbcff;
+      background: #13263a;
+    }
+
+    .rank-row {
+      border-color: #34465e;
+      background: #0d1522;
+    }
+
+    .strong-cell,
+    .detail-group {
+      color: #eef6ff;
+      border-color: #26354a;
+      background: #0d1522;
+    }
+
+    .hero-stat.primary-stat {
+      border-left-color: #5bbcff;
+    }
+
+    .financing-row {
+      border-top-color: #26354a;
+    }
+
+    /* Lighter typography */
+    body { font-weight: 400; }
+    h1 { font-weight: 600; }
+    strong, b { font-weight: 600; }
+
+    .dashboard-controls h2,
+    .result-title,
+    .card-title,
+    .rank-main > strong,
+    .hero-stat strong,
+    .detail-group h4 {
+      font-weight: 700;
+    }
+
+    .subline,
+    .dashboard-controls p,
+    .card-sub,
+    .status {
+      font-weight: 400;
+    }
+
+    button,
+    .badge,
+    .rank-no,
+    .group-value strong,
+    .financing-row strong {
+      font-weight: 600;
+    }
+
+    .result-heading span,
+    .hero-stat span,
+    .group-value span,
+    .financing-row span,
+    .strong-cell > span {
+      font-weight: 500;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .data-grid, .strong-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .app { width: min(100% - 16px, 1120px); padding: 10px 0 28px; }
+      .topbar { flex-direction: column; align-items: stretch; margin-bottom: 14px; padding: 8px 4px 14px; }
+      h1 { font-size: 30px; }
+      .subline { font-size: 12px; }
+      .card-head { flex-direction: column; align-items: stretch; }
+      .live-mark { align-self: flex-start; }
+      .grid-2, .actions, .data-grid, .context-grid { grid-template-columns: 1fr; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .metric { min-height: 72px; padding: 11px; }
+      .metric strong { font-size: 17px; margin-top: 3px; }
+      .metric span { font-size: 10px; }
+      .status { font-size: 12px; min-height: 40px; margin-bottom: 8px; }
+      .result-section { margin-top: 14px; padding: 0; border-radius: 0; }
+      .result-heading { align-items: baseline; padding: 0 3px; }
+      .result-title { font-size: 19px; }
+      .result-heading span { font-size: 9px; }
+      .card { padding: 12px 8px; }
+      .card-title { font-size: 18px; }
+      .card-sub { font-size: 11px; line-height: 1.45; }
+      .ranking { gap: 7px; }
+      .rank-row, .rank-row.strong-detail { grid-template-columns: 30px minmax(0, 1fr); gap: 5px; padding: 8px 6px; }
+      .rank-no { font-size: 11px; }
+      .strong-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+      .strong-cell { padding: 8px; min-height: 56px; }
+      .strong-cell > span { font-size: 10px; }
+      .strong-cell strong, .strong-split b { font-size: 12px; }
+      .signal-hero { gap: 6px; }
+      .hero-stat { padding: 10px 8px; }
+      .hero-stat strong { font-size: 20px; }
+      .detail-groups { grid-template-columns: 1fr; gap: 6px; }
+      .turning-groups { grid-template-columns: 1fr; }
+      .detail-group { padding: 8px; }
+      .group-values { gap: 6px; }
+      .group-value strong { font-size: 13px; }
+      .rank-side { grid-column: 2; }
+      .dashboard-controls { align-items: stretch; flex-direction: column; gap: 12px; padding: 14px; margin-bottom: 10px; }
+      .dashboard-controls p { font-size: 12px; }
+      .refresh-all { width: 100%; min-height: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Stock Chip</h1>
+        <div class="subline">台股籌碼雷達 · 法人動向 · 融資水位</div>
+      </div>
+      <div class="live-mark">Market Intelligence</div>
+    </header>
+
+    <section class="layout">
+      <section>
+        <div class="panel dashboard-controls">
+          <div>
+            <h2>每日籌碼快照</h2>
+            <p>一次同步法人與資券資料，更新兩組前 10 名排行。</p>
+          </div>
+          <button id="refreshAllButton" class="primary refresh-all">更新全部資訊</button>
+        </div>
+
+        <div class="hidden-controls" aria-hidden="true">
+          <button id="queryButton"></button>
+          <button id="strongButton"></button>
+          <button id="turningButton"></button>
+          <div id="modeForm">
+            <div id="modeTitle"></div>
+          <div id="stockField" class="field">
+              <input id="stockInput" value="2330">
+          </div>
+          <div id="fieldsGrid" class="grid-2">
+            <div id="dateField" class="field">
+                <input id="dateInput">
+            </div>
+            <div id="rankField" class="field">
+                <input id="rankInput" type="number" value="10">
+            </div>
+          </div>
+          <button id="executeButton"></button>
+          <span id="instDate"></span>
+          <span id="marginDate"></span>
+          <span id="instTotal"></span>
+          <span id="marginChange"></span>
+        </div>
+        </div>
+
+        <div class="panel status" id="statusText">按下更新按鈕，取得最新排行。</div>
+
+        <section class="result-section strong-zone" aria-labelledby="strongResultTitle">
+          <div class="result-heading">
+            <h2 class="result-title" id="strongResultTitle">強勢股前 10 名</h2>
+            <span>STRONG CHIPS</span>
+          </div>
+          <div id="strongResult"><div class="panel empty">尚未更新</div></div>
+        </section>
+
+        <section class="result-section turning-zone" aria-labelledby="turningResultTitle">
+          <div class="result-heading">
+            <h2 class="result-title" id="turningResultTitle">籌碼轉強前 10 名</h2>
+            <span>MOMENTUM SHIFT</span>
+          </div>
+          <div id="turningResult"><div class="panel empty">尚未更新</div></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const INST_API = "https://www.twse.com.tw/rwd/zh/fund/T86";
+    const MARGIN_API = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN";
+    const TDCC_PROXY_API = "https://tdcc-shareholding.goodely.workers.dev/api/tdcc-shareholding";
+    const TDCC_SNAPSHOT_KEY = "tdccShareholderSnapshot";
+    let activeMode = "";
+    let lastApiDebug = [];
+
+    const els = {
+      stock: document.getElementById("stockInput"),
+      date: document.getElementById("dateInput"),
+      rank: document.getElementById("rankInput"),
+      query: document.getElementById("queryButton"),
+      strongButton: document.getElementById("strongButton"),
+      turningButton: document.getElementById("turningButton"),
+      modeForm: document.getElementById("modeForm"),
+      modeTitle: document.getElementById("modeTitle"),
+      fieldsGrid: document.getElementById("fieldsGrid"),
+      stockField: document.getElementById("stockField"),
+      dateField: document.getElementById("dateField"),
+      rankField: document.getElementById("rankField"),
+      execute: document.getElementById("executeButton"),
+      status: document.getElementById("statusText"),
+      result: document.getElementById("strongResult"),
+      instDate: document.getElementById("instDate"),
+      marginDate: document.getElementById("marginDate"),
+      instTotal: document.getElementById("instTotal"),
+      marginChange: document.getElementById("marginChange"),
+      refreshAll: document.getElementById("refreshAllButton"),
+      strongResult: document.getElementById("strongResult"),
+      turningResult: document.getElementById("turningResult"),
+    };
+
+    const modeConfig = {
+      query: {
+        title: "查個股",
+        action: "查詢個股",
+        showStock: true,
+        showRank: false,
+        status: "輸入股票代號與日期後查詢。",
+      },
+      strong: {
+        title: "強勢股",
+        action: "篩選強勢股",
+        showStock: false,
+        showRank: true,
+        status: "選擇日期與顯示筆數後篩選。",
+      },
+      turning: {
+        title: "籌碼轉強",
+        action: "篩選轉強股",
+        showStock: false,
+        showRank: true,
+        status: "用最近 2 個交易日比對法人與投信買盤改善。",
+      },
+    };
+
+    function setActiveMode(mode) {
+      activeMode = mode;
+      const config = modeConfig[mode];
+      if (!config) return;
+      els.modeForm.classList.add("is-open");
+      els.modeTitle.textContent = config.title;
+      els.execute.textContent = config.action;
+      els.stockField.classList.toggle("is-hidden", !config.showStock);
+      els.rankField.classList.toggle("is-hidden", !config.showRank);
+      els.fieldsGrid.classList.toggle("is-single", !config.showRank);
+      els.query.classList.toggle("is-active", mode === "query");
+      els.strongButton.classList.toggle("is-active", mode === "strong");
+      els.turningButton.classList.toggle("is-active", mode === "turning");
+      els.status.textContent = config.status;
+      if (config.showStock) {
+        els.stock.focus();
+      } else {
+        els.date.focus();
+      }
+    }
+
+    async function executeActiveMode() {
+      if (activeMode === "query") {
+        await queryStock();
+      } else if (activeMode === "strong") {
+        await showStrongChips();
+      } else if (activeMode === "turning") {
+        await showTurningChips();
+      } else {
+        els.status.textContent = "請先選擇功能。";
+      }
+    }
+
+    let lastInst = null;
+    let lastMargin = null;
+
+    function todayYmd() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}${m}${day}`;
+    }
+
+    function addDays(ymd, delta) {
+      const d = new Date(Number(ymd.slice(0, 4)), Number(ymd.slice(4, 6)) - 1, Number(ymd.slice(6, 8)));
+      d.setDate(d.getDate() + delta);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}${m}${day}`;
+    }
+
+    function toNum(value) {
+      const n = Number(String(value ?? "").replace(/,/g, "").trim());
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function fmtNum(value) {
+      if (!Number.isFinite(value)) return "--";
+      return new Intl.NumberFormat("zh-TW").format(Math.round(value));
+    }
+
+    function fmtPct(value) {
+      return Number.isFinite(value) ? `${value.toFixed(2)}%` : "--";
+    }
+
+    function signedClass(value) {
+      if (!Number.isFinite(value) || value === 0) return "neutral";
+      return value > 0 ? "positive" : "negative";
+    }
+
+    function signed(value) {
+      if (!Number.isFinite(value)) return "--";
+      return `${value > 0 ? "+" : ""}${fmtNum(value)}`;
+    }
+
+    function signedPct(value) {
+      if (!Number.isFinite(value)) return "--";
+      return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+    }
+
+    function brokerChipUrl(code) {
+      return `https://histock.tw/stock/chips.aspx?no=${encodeURIComponent(code)}`;
+    }
+
+    function renderBrokerChipLink(code) {
+      return `<a class="badge chip-link" href="${brokerChipUrl(code)}" target="_blank" rel="noopener noreferrer">買賣家數差</a>`;
+    }
+
+    function resetApiDebug() {
+      lastApiDebug = [];
+    }
+
+    function addApiDebug(name, status, detail = "") {
+      lastApiDebug.push({
+        name,
+        status,
+        detail,
+        time: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
+      });
+    }
+
+    function renderApiDebug() {
+      return "";
+    }
+
+    function renderFailure(error) {
+      return `
+        <div class="panel empty">${error?.message || "查詢失敗"}</div>
+        ${renderApiDebug()}
+      `;
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function buildUrl(url, params = {}) {
+      const query = new URLSearchParams(params);
+      return query.toString() ? `${url}?${query}` : url;
+    }
+
+    async function fetchTextStable(url, params = {}, options = {}) {
+      const {
+        name = url,
+        retries = 2,
+        timeoutMs = 10000,
+        delayMs = 380,
+        silent = false,
+      } = options;
+      const fullUrl = buildUrl(url, params);
+      let lastError = null;
+
+      for (let attempt = 0; attempt <= retries; attempt += 1) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const response = await fetch(fullUrl, {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const text = await response.text();
+          if (!silent) addApiDebug(name, "ok", `${response.status} ${fmtNum(text.length)} bytes`);
+          return { text, response };
+        } catch (error) {
+          clearTimeout(timeout);
+          lastError = error;
+          const reason = error?.name === "AbortError" ? `逾時 ${timeoutMs}ms` : error?.message || String(error);
+          if (!silent) addApiDebug(name, attempt < retries ? "skip" : "error", `第 ${attempt + 1} 次 ${reason}`);
+          if (attempt < retries) await sleep(delayMs * (attempt + 1));
+        }
+      }
+
+      throw new Error(`${name} 連線失敗：${lastError?.message || lastError || "未知錯誤"}`);
+    }
+
+    function splitCsvLine(line) {
+      const cells = [];
+      let cell = "";
+      let quoted = false;
+      for (const char of line) {
+        if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          cells.push(cell);
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+      cells.push(cell);
+      return cells.map((value) => value.trim().replace(/^"|"$/g, ""));
+    }
+
+    function isEtfLikeCode(code) {
+      return String(code || "").trim().startsWith("00");
+    }
+
+    function parseTdccCsv(text) {
+      const lines = String(text || "").replace(/^\uFEFF/, "").split(/\r?\n/).filter(Boolean);
+      const header = splitCsvLine(lines.shift() || "");
+      const idx = Object.fromEntries(header.map((field, index) => [field, index]));
+      const byCode = new Map();
+
+      for (const line of lines) {
+        const row = splitCsvLine(line);
+        const code = String(row[idx["證券代號"]] || "").trim();
+        const level = Number(row[idx["持股分級"]]);
+        if (!code.match(/^\d{4}$/) || !Number.isFinite(level)) continue;
+        const item = byCode.get(code) || {
+          date: String(row[idx["資料日期"]] || "").trim(),
+          code,
+          levels: {},
+        };
+        item.levels[level] = {
+          people: toNum(row[idx["人數"]]),
+          shares: toNum(row[idx["股數"]]),
+          pct: Number(String(row[idx["占集保庫存數比例%"]] || "").trim()),
+        };
+        byCode.set(code, item);
+      }
+
+      return [...byCode.values()].map((item) => {
+        const pct1000 = item.levels[15]?.pct;
+        const pct400 = [12, 13, 14, 15].reduce((sum, level) => {
+          const value = item.levels[level]?.pct;
+          return sum + (Number.isFinite(value) ? value : 0);
+        }, 0);
+        const retail = [1, 2, 3].reduce((sum, level) => {
+          const value = item.levels[level]?.pct;
+          return sum + (Number.isFinite(value) ? value : 0);
+        }, 0);
+        return {
+          ...item,
+          name: item.code,
+          pct1000: Number.isFinite(pct1000) ? pct1000 : null,
+          pct400,
+          retail,
+        };
+      });
+    }
+
+    function normalizeTdccRows(rows) {
+      if (!Array.isArray(rows)) return [];
+      return rows
+        .filter((row) => row && String(row.code || "").match(/^\d{4}$/))
+        .map((row) => ({
+          date: String(row.date || "").trim(),
+          code: String(row.code || "").trim(),
+          name: String(row.name || row.code || "").trim(),
+          pct1000: Number.isFinite(Number(row.pct1000)) ? Number(row.pct1000) : null,
+          pct400: Number.isFinite(Number(row.pct400)) ? Number(row.pct400) : null,
+          retail: Number.isFinite(Number(row.retail)) ? Number(row.retail) : null,
+        }))
+        .filter((row) => Number.isFinite(row.pct400));
+    }
+
+    async function fetchTdccShareholders() {
+      const { text, response } = await fetchTextStable(TDCC_PROXY_API, {}, {
+        name: "TDCC Worker API",
+        retries: 2,
+        timeoutMs: 12000,
+      });
+      const contentType = response.headers.get("content-type") || "";
+
+      let rows = [];
+      if (contentType.includes("application/json") || text.trim().startsWith("{") || text.trim().startsWith("[")) {
+        const data = JSON.parse(text);
+        rows = normalizeTdccRows(Array.isArray(data) ? data : data.rows);
+      } else {
+        rows = parseTdccCsv(text);
+      }
+
+      if (!rows.length) {
+        addApiDebug("TDCC Worker API 解析", "error", "0 rows");
+        throw new Error("TDCC Worker API 有回應，但資料解析後是 0 筆，請檢查 Worker 回傳格式。");
+      }
+      addApiDebug("TDCC Worker API 解析", "ok", `${fmtNum(rows.length)} 檔`);
+      return rows;
+    }
+
+    async function preflightBigHolderApis(ymd) {
+      addApiDebug("大戶 API preflight", "skip", "開始檢查 TDCC Worker 與 TWSE 資券");
+      const holderRows = await fetchTdccShareholders();
+      addApiDebug("大戶 API preflight", "ok", `TDCC ${fmtNum(holderRows.length)} 檔`);
+
+      const margin = await fetchWithFallback("margin", ymd);
+      if (margin && margin.rows.length) {
+        addApiDebug("大戶 API preflight", "ok", `TWSE 資券 ${margin.date} ${fmtNum(margin.rows.length)} 筆`);
+      } else {
+        addApiDebug("大戶 API preflight", "skip", "TWSE 資券近 7 天無資料，仍可顯示大戶資料");
+      }
+      return { holderRows, margin };
+    }
+
+    function readTdccSnapshot() {
+      try {
+        const snapshot = JSON.parse(localStorage.getItem(TDCC_SNAPSHOT_KEY) || "null");
+        if (!snapshot || !snapshot.date || !Array.isArray(snapshot.rows)) return null;
+        return snapshot;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function saveTdccSnapshot(rows) {
+      const date = rows.find((row) => row.date)?.date || "";
+      const compactRows = rows.map((row) => ({
+        code: row.code,
+        pct1000: row.pct1000,
+        pct400: row.pct400,
+        retail: row.retail,
+      }));
+      localStorage.setItem(TDCC_SNAPSHOT_KEY, JSON.stringify({ date, rows: compactRows }));
+    }
+
+    function enrichHolderChanges(rows, snapshot) {
+      const previous = new Map((snapshot?.rows || []).map((row) => [row.code, row]));
+      return rows.map((row) => {
+        const prev = previous.get(row.code);
+        return {
+          ...row,
+          previousDate: snapshot?.date || "",
+          delta1000: prev && Number.isFinite(prev.pct1000) && Number.isFinite(row.pct1000) ? row.pct1000 - prev.pct1000 : null,
+          delta400: prev && Number.isFinite(prev.pct400) && Number.isFinite(row.pct400) ? row.pct400 - prev.pct400 : null,
+          deltaRetail: prev && Number.isFinite(prev.retail) && Number.isFinite(row.retail) ? row.retail - prev.retail : null,
+        };
+      });
+    }
+
+    function marginTagsFor(row) {
+      const tags = [];
+      if (!row) return [`<span class="badge">無資券</span>`];
+      if (Number.isFinite(row.offset) && row.offset > 0) tags.push(`<span class="badge good">互抵 ${fmtNum(row.offset)}</span>`);
+      if (Number.isFinite(row.offset) && row.offset === 0) tags.push(`<span class="badge">互抵 0</span>`);
+      if (Number.isFinite(row.marginUse) && row.marginUse < 30) tags.push(`<span class="badge good">融資低</span>`);
+      if (Number.isFinite(row.marginChange) && row.marginChange !== 0) {
+        tags.push(`<span class="badge ${row.marginChange > 0 ? "" : "good"}">融資${row.marginChange > 0 ? "增" : "減"} ${signed(row.marginChange)}</span>`);
+      }
+      return tags.length ? tags : [`<span class="badge">資券平淡</span>`];
+    }
+
+    async function fetchJson(url, params) {
+      const apiName = url.includes("T86")
+        ? "TWSE 三大法人"
+        : url.includes("MI_MARGN")
+          ? "TWSE 資券"
+          : url;
+      const { text } = await fetchTextStable(url, params, {
+        name: apiName,
+        retries: 2,
+        timeoutMs: 10000,
+      });
+      const data = JSON.parse(text);
+      const stat = data?.stat || data?.rtmessage || "OK";
+      if (stat !== "OK") addApiDebug(apiName, "skip", String(stat));
+      return data;
+    }
+
+    function normalizeInst(data) {
+      if (!data || data.stat !== "OK" || !Array.isArray(data.fields) || !Array.isArray(data.data)) return null;
+      const fields = data.fields;
+      const idx = Object.fromEntries(fields.map((field, i) => [field, i]));
+      const rows = data.data
+        .filter((row) => String(row[idx["證券代號"]] || "").trim().match(/^\d{4}$/))
+        .map((row) => ({
+          code: String(row[idx["證券代號"]]).trim(),
+          name: String(row[idx["證券名稱"]]).trim(),
+          foreign: toNum(row[idx["外陸資買賣超股數(不含外資自營商)"]]),
+          trust: toNum(row[idx["投信買賣超股數"]]),
+          dealer: toNum(row[idx["自營商買賣超股數"]]),
+          total: toNum(row[idx["三大法人買賣超股數"]]),
+        }));
+      return { date: data.date, rows };
+    }
+
+    function normalizeMargin(data) {
+      if (!data || data.stat !== "OK" || !Array.isArray(data.tables) || data.tables.length < 2) return null;
+      const table = data.tables[1];
+      if (!Array.isArray(table.data)) return null;
+      const rows = table.data
+        .filter((row) => String(row[0] || "").trim().match(/^\d{4}$/))
+        .map((row) => {
+          const marginPrev = toNum(row[5]);
+          const marginNow = toNum(row[6]);
+          const shortPrev = toNum(row[11]);
+          const shortNow = toNum(row[12]);
+          const limit = toNum(row[7]);
+          return {
+            code: String(row[0]).trim(),
+            name: String(row[1]).trim(),
+            marginNow,
+            marginChange: marginNow - marginPrev,
+            shortNow,
+            shortChange: shortNow - shortPrev,
+            offset: toNum(row[14]),
+            marginLimit: limit,
+            marginUse: marginNow > 0 && limit > 0 ? marginNow / limit * 100 : null,
+          };
+        });
+      return { date: data.date, rows };
+    }
+
+    async function fetchWithFallback(kind, ymd) {
+      for (let i = 0; i <= 7; i += 1) {
+        const date = addDays(ymd, -i);
+        try {
+          const data = kind === "inst"
+            ? await fetchJson(INST_API, { response: "json", date, selectType: "ALL" })
+            : await fetchJson(MARGIN_API, { response: "json", date, selectType: "ALL" });
+          const normalized = kind === "inst" ? normalizeInst(data) : normalizeMargin(data);
+          if (normalized && normalized.rows.length) {
+            addApiDebug(kind === "inst" ? "法人 fallback" : "資券 fallback", "ok", `${date} ${fmtNum(normalized.rows.length)} 筆`);
+            return normalized;
+          }
+          addApiDebug(kind === "inst" ? "法人 fallback" : "資券 fallback", "skip", `${date} 無資料`);
+        } catch (error) {
+          addApiDebug(kind === "inst" ? "法人 fallback" : "資券 fallback", "error", `${date} ${error.message || error}`);
+        }
+        await sleep(260);
+      }
+      return null;
+    }
+
+    async function fetchInstitutionalDay(date) {
+      const data = await fetchJson(INST_API, { response: "json", date, selectType: "ALL" });
+      return normalizeInst(data);
+    }
+
+    async function fetchRecentInstitutionalDays(count, endYmd) {
+      const days = [];
+      let date = endYmd;
+      for (let i = 0; i < 60 && days.length < count; i += 1) {
+        try {
+          const normalized = await fetchInstitutionalDay(date);
+          if (normalized && normalized.rows.length) days.push(normalized);
+        } catch (error) {
+          // Skip holidays or unavailable dates.
+        }
+        date = addDays(date, -1);
+        await sleep(260);
+      }
+      return days.reverse();
+    }
+
+    function signalFor(inst, margin) {
+      if (!inst || !margin) return { text: "資料不足，無法判斷", tone: "" };
+      const total = inst.total;
+      const marginChange = margin.marginChange;
+      const shortChange = margin.shortChange;
+      if (total > 0 && marginChange > 0) return { text: "法人買超 + 融資增加 -> 散戶跟進，偏多", tone: "good" };
+      if (total > 0 && shortChange > 0) return { text: "法人買超 + 融券增加 -> 有人放空對賭，留意軋空", tone: "good" };
+      if (total < 0 && marginChange > 0) return { text: "法人賣超 + 融資增加 -> 散戶接刀，偏空警示", tone: "bad" };
+      if (total < 0 && shortChange > 0) return { text: "法人賣超 + 融券增加 -> 多空皆跑，偏空", tone: "bad" };
+      if (total > 0 && marginChange < 0) return { text: "法人買超 + 融資減少 -> 散戶獲利了結，法人獨撐", tone: "good" };
+      if (total < 0 && shortChange < 0) return { text: "法人賣超 + 融券回補 -> 空方獲利了結，可能止跌", tone: "" };
+      return { text: `法人${total > 0 ? "買超" : "賣超"}，融資${marginChange > 0 ? "增加" : "減少"}，融券${shortChange > 0 ? "增加" : "減少"}`, tone: "" };
+    }
+
+    function setMetrics(inst, margin) {
+      els.instDate.textContent = lastInst?.date || "--";
+      els.marginDate.textContent = lastMargin?.date || "--";
+      els.instTotal.textContent = inst ? signed(inst.total) : "--";
+      els.instTotal.className = inst ? signedClass(inst.total) : "";
+      els.marginChange.textContent = margin ? signed(margin.marginChange) : "--";
+      els.marginChange.className = margin ? signedClass(margin.marginChange) : "";
+    }
+
+    function renderStock(inst, margin, code) {
+      const name = inst?.name || margin?.name || code;
+      const signal = signalFor(inst, margin);
+      els.result.innerHTML = `
+        <article class="panel card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">${code} ${name}</div>
+              <div class="card-sub">法人 ${lastInst?.date || "--"} / 資券 ${lastMargin?.date || "--"}</div>
+            </div>
+            <div class="strong-split">
+              <span class="badge ${signal.tone === "bad" ? "bad" : signal.tone === "good" ? "good" : ""}">${inst?.total >= 0 ? "法人買超" : "法人賣超"}</span>
+              ${renderBrokerChipLink(code)}
+            </div>
+          </div>
+          <div class="data-grid">
+            <div class="cell"><span>外資</span><strong class="${signedClass(inst?.foreign)}">${inst ? signed(inst.foreign) : "--"}</strong></div>
+            <div class="cell"><span>投信</span><strong class="${signedClass(inst?.trust)}">${inst ? signed(inst.trust) : "--"}</strong></div>
+            <div class="cell"><span>自營商</span><strong class="${signedClass(inst?.dealer)}">${inst ? signed(inst.dealer) : "--"}</strong></div>
+            <div class="cell"><span>三大法人</span><strong class="${signedClass(inst?.total)}">${inst ? signed(inst.total) : "--"}</strong></div>
+            <div class="cell"><span>融資餘額</span><strong>${margin ? fmtNum(margin.marginNow) : "--"}</strong></div>
+            <div class="cell"><span>融資變化</span><strong class="${signedClass(margin?.marginChange)}">${margin ? signed(margin.marginChange) : "--"}</strong></div>
+            <div class="cell"><span>融券餘額</span><strong>${margin ? fmtNum(margin.shortNow) : "--"}</strong></div>
+            <div class="cell"><span>融券變化</span><strong class="${signedClass(margin?.shortChange)}">${margin ? signed(margin.shortChange) : "--"}</strong></div>
+            <div class="cell"><span>資券互抵</span><strong>${margin ? fmtNum(margin.offset) : "--"}</strong></div>
+            <div class="cell"><span>融資使用率</span><strong>${margin ? fmtPct(margin.marginUse) : "--"}</strong></div>
+          </div>
+        </article>
+        <article class="panel card signal ${signal.tone}">
+          <div class="card-title">訊號判斷</div>
+          <div class="card-sub">${signal.text}</div>
+        </article>
+        ${renderApiDebug()}
+      `;
+    }
+
+    async function ensureData() {
+      const ymd = (els.date.value || todayYmd()).replace(/\D/g, "");
+      els.date.value = ymd;
+      els.status.textContent = "抓取 TWSE 資料中";
+      const [inst, margin] = await Promise.all([
+        fetchWithFallback("inst", ymd),
+        fetchWithFallback("margin", ymd),
+      ]);
+      lastInst = inst;
+      lastMargin = margin;
+      if (!lastInst && !lastMargin) throw new Error("近 7 天查無資料");
+    }
+
+    async function queryStock() {
+      const code = els.stock.value.trim();
+      if (!code.match(/^\d{4}$/)) {
+        els.status.textContent = "請輸入 4 碼股票代號";
+        return;
+      }
+      resetApiDebug();
+      els.query.disabled = true;
+      els.execute.disabled = true;
+      try {
+        await ensureData();
+        const inst = lastInst?.rows.find((row) => row.code === code) || null;
+        const margin = lastMargin?.rows.find((row) => row.code === code) || null;
+        setMetrics(inst, margin);
+        renderStock(inst, margin, code);
+        els.status.textContent = inst || margin ? "完成" : "查無此股票或非上市普通股";
+        localStorage.setItem("stockChipCode", code);
+      } catch (error) {
+        els.status.textContent = error.message || "查詢失敗";
+        els.result.innerHTML = renderFailure(error);
+      } finally {
+        els.query.disabled = false;
+        els.execute.disabled = false;
+      }
+    }
+
+    async function showStrongChips() {
+      resetApiDebug();
+      els.strongButton.disabled = true;
+      els.execute.disabled = true;
+      try {
+        const ymd = (els.date.value || todayYmd()).replace(/\D/g, "");
+        els.date.value = ymd;
+        const n = Math.max(3, Math.min(30, Number(els.rank.value) || 10));
+        const lookbackDays = 20;
+        els.status.textContent = `抓取最近 ${lookbackDays} 個交易日法人資料`;
+
+        const days = await fetchRecentInstitutionalDays(lookbackDays, ymd);
+        if (days.length < 2) throw new Error("無法取得足夠交易日資料");
+
+        const latestDate = days[days.length - 1].date;
+        els.status.textContent = "抓取資券標籤";
+        const margin = await fetchWithFallback("margin", latestDate);
+        if (!margin || !margin.rows.length) addApiDebug("TWSE 資券", "skip", "查無資券資料，強勢股仍照法人資料顯示");
+
+        lastInst = days[days.length - 1];
+        lastMargin = margin;
+
+        const maps = days.map((day) => new Map(day.rows.map((row) => [row.code, row])));
+        const marginMap = new Map((margin?.rows || []).map((row) => [row.code, row]));
+        const rows = [];
+
+        for (const latest of days[days.length - 1].rows) {
+          const code = latest.code;
+          const instRows = maps.map((map) => map.get(code));
+          const marginRow = marginMap.get(code);
+          if (isEtfLikeCode(code)) continue;
+          if (!instRows.every(Boolean)) continue;
+          let consecutiveBuyDays = 0;
+          let streakForeign = 0;
+          let streakTrust = 0;
+          for (let i = instRows.length - 1; i >= 0; i -= 1) {
+            const row = instRows[i];
+            if (!row || row.foreign <= 0 || row.trust <= 0) break;
+            consecutiveBuyDays += 1;
+            streakForeign += row.foreign;
+            streakTrust += row.trust;
+          }
+          if (!consecutiveBuyDays) continue;
+          rows.push({
+            code,
+            name: latest.name,
+            totals: instRows.map((row) => row.total),
+            foreigns: instRows.map((row) => row.foreign),
+            trusts: instRows.map((row) => row.trust),
+            consecutiveBuyDays,
+            streakForeign,
+            streakTrust,
+            trust: latest.trust,
+            dealer: latest.dealer,
+            margin: marginRow,
+            latestTotal: latest.total,
+            latestForeign: latest.foreign,
+          });
+        }
+
+        const topRows = rows
+          .sort((a, b) => b.consecutiveBuyDays - a.consecutiveBuyDays || b.latestTotal - a.latestTotal)
+          .slice(0, n);
+
+        els.instDate.textContent = `${days[0].date}~${latestDate}`;
+        els.marginDate.textContent = margin?.date || "--";
+        els.instTotal.textContent = String(topRows.length);
+        els.instTotal.className = "";
+        els.marginChange.textContent = "外資投信連買";
+        els.marginChange.className = "positive";
+        els.status.textContent = `完成，符合 ${rows.length} 檔`;
+
+        if (!topRows.length) {
+          els.result.innerHTML = `<div class="panel empty">目前無符合條件的強勢股</div>${renderApiDebug()}`;
+          return;
+        }
+
+        els.result.innerHTML = `
+          <article class="panel card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">外資投信連買前 ${n} 名</div>
+                <div class="card-sub">排除 ETF，由最新交易日往前計算外資與投信同時買超的連續天數；天數相同時依最新三大法人買超排序</div>
+              </div>
+              <span class="badge good">${days[0].date}~${latestDate}</span>
+            </div>
+            <div class="ranking">
+              ${topRows.map((row, index) => `
+                <div class="rank-row strong-detail">
+                  <div class="rank-no">#${index + 1}</div>
+                  <div class="rank-main">
+                    <strong>${row.code} ${row.name} ${renderBrokerChipLink(row.code)}</strong>
+                    <div class="signal-hero">
+                      <div class="hero-stat primary-stat">
+                        <span>外資投信連買</span>
+                        <strong class="streak-days">${row.consecutiveBuyDays} 天</strong>
+                      </div>
+                      <div class="hero-stat">
+                        <span>最新三大法人</span>
+                        <strong class="${signedClass(row.latestTotal)}">${signed(row.latestTotal)}</strong>
+                      </div>
+                    </div>
+                    <div class="detail-groups">
+                      <section class="detail-group">
+                        <h4>今日買盤</h4>
+                        <div class="group-values">
+                          <div class="group-value"><span>外資</span><strong class="${signedClass(row.latestForeign)}">${signed(row.latestForeign)}</strong></div>
+                          <div class="group-value"><span>投信</span><strong class="${signedClass(row.trust)}">${signed(row.trust)}</strong></div>
+                          <div class="group-value"><span>自營商</span><strong class="${signedClass(row.dealer)}">${signed(row.dealer)}</strong></div>
+                        </div>
+                      </section>
+                      <section class="detail-group">
+                        <h4>連買期間</h4>
+                        <div class="group-values streak-values">
+                          <div class="group-value"><span>外資合計</span><strong class="${signedClass(row.streakForeign)}">${signed(row.streakForeign)}</strong></div>
+                          <div class="group-value"><span>投信合計</span><strong class="${signedClass(row.streakTrust)}">${signed(row.streakTrust)}</strong></div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="financing-row">
+                      <span>融資使用率</span>
+                      <strong>${fmtPct(row.margin?.marginUse)}</strong>
+                    </div>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </article>
+          ${renderApiDebug()}
+        `;
+      } catch (error) {
+        els.status.textContent = error.message || "查詢失敗";
+        els.result.innerHTML = renderFailure(error);
+      } finally {
+        els.strongButton.disabled = false;
+        els.execute.disabled = false;
+      }
+    }
+
+    async function showTurningChips() {
+      resetApiDebug();
+      els.turningButton.disabled = true;
+      els.execute.disabled = true;
+      try {
+        const ymd = (els.date.value || todayYmd()).replace(/\D/g, "");
+        els.date.value = ymd;
+        const n = Math.max(3, Math.min(30, Number(els.rank.value) || 10));
+        els.status.textContent = "抓取最近 2 個交易日法人資料";
+
+        const days = await fetchRecentInstitutionalDays(2, ymd);
+        if (days.length < 2) throw new Error("無法取得足夠交易日資料");
+
+        const previousDay = days[0];
+        const latestDay = days[1];
+        els.status.textContent = "抓取資券標籤";
+        const margin = await fetchWithFallback("margin", latestDay.date);
+        if (!margin || !margin.rows.length) addApiDebug("TWSE 資券", "skip", "查無資券資料，籌碼轉強仍照法人資料顯示");
+
+        lastInst = latestDay;
+        lastMargin = margin;
+
+        const previousMap = new Map(previousDay.rows.map((row) => [row.code, row]));
+        const marginMap = new Map((margin?.rows || []).map((row) => [row.code, row]));
+        const rows = [];
+
+        for (const latest of latestDay.rows) {
+          const code = latest.code;
+          if (isEtfLikeCode(code)) continue;
+          const previous = previousMap.get(code);
+          if (!previous) continue;
+          const totalDelta = latest.total - previous.total;
+          const trustDelta = latest.trust - previous.trust;
+          if (latest.total <= 0 || totalDelta <= 0 || latest.trust < 100000) continue;
+          rows.push({
+            code,
+            name: latest.name,
+            previous,
+            latest,
+            totalDelta,
+            trustDelta,
+            improvementScore: totalDelta + trustDelta,
+            margin: marginMap.get(code),
+          });
+        }
+
+        const topRows = rows
+          .sort((a, b) => b.improvementScore - a.improvementScore)
+          .slice(0, n);
+
+        els.instDate.textContent = `${previousDay.date}~${latestDay.date}`;
+        els.marginDate.textContent = margin?.date || "--";
+        els.instTotal.textContent = String(topRows.length);
+        els.instTotal.className = "";
+        els.marginChange.textContent = "2日改善";
+        els.marginChange.className = "positive";
+        els.status.textContent = `完成，符合 ${rows.length} 檔`;
+
+        if (!topRows.length) {
+          els.result.innerHTML = `<div class="panel empty">目前無符合條件的籌碼轉強股</div>${renderApiDebug()}`;
+          return;
+        }
+
+        els.result.innerHTML = `
+          <article class="panel card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">籌碼轉強前 ${n} 名</div>
+                <div class="card-sub">排除 ETF，最新三大法人買超，法人買盤改善，投信買超 100 張以上，賣超變化只納入改善分數</div>
+              </div>
+              <span class="badge good">${previousDay.date}~${latestDay.date}</span>
+            </div>
+            <div class="ranking">
+              ${topRows.map((row, index) => `
+                <div class="rank-row strong-detail">
+                  <div class="rank-no">#${index + 1}</div>
+                  <div class="rank-main">
+                    <strong>${row.code} ${row.name} ${renderBrokerChipLink(row.code)}</strong>
+                    <div class="signal-hero">
+                      <div class="hero-stat primary-stat">
+                        <span>改善分數</span>
+                        <strong class="${signedClass(row.improvementScore)}">${signed(row.improvementScore)}</strong>
+                      </div>
+                      <div class="hero-stat">
+                        <span>最新三大法人</span>
+                        <strong class="${signedClass(row.latest.total)}">${signed(row.latest.total)}</strong>
+                      </div>
+                    </div>
+                    <div class="detail-groups turning-groups">
+                      <section class="detail-group">
+                        <h4>今日買盤</h4>
+                        <div class="group-values">
+                          <div class="group-value"><span>外資</span><strong class="${signedClass(row.latest.foreign)}">${signed(row.latest.foreign)}</strong></div>
+                          <div class="group-value"><span>投信</span><strong class="${signedClass(row.latest.trust)}">${signed(row.latest.trust)}</strong></div>
+                          <div class="group-value"><span>自營商</span><strong class="${signedClass(row.latest.dealer)}">${signed(row.latest.dealer)}</strong></div>
+                        </div>
+                      </section>
+                      <section class="detail-group">
+                        <h4>改善幅度</h4>
+                        <div class="group-values streak-values">
+                          <div class="group-value"><span>法人</span><strong class="${signedClass(row.totalDelta)}">${signed(row.totalDelta)}</strong></div>
+                          <div class="group-value"><span>投信</span><strong class="${signedClass(row.trustDelta)}">${signed(row.trustDelta)}</strong></div>
+                        </div>
+                      </section>
+                      <section class="detail-group">
+                        <h4>前日對照</h4>
+                        <div class="group-values streak-values">
+                          <div class="group-value"><span>外資</span><strong class="${signedClass(row.previous.foreign)}">${signed(row.previous.foreign)}</strong></div>
+                          <div class="group-value"><span>投信</span><strong class="${signedClass(row.previous.trust)}">${signed(row.previous.trust)}</strong></div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="financing-row">
+                      <span>融資使用率</span>
+                      <strong>${fmtPct(row.margin?.marginUse)}</strong>
+                    </div>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </article>
+          ${renderApiDebug()}
+        `;
+      } catch (error) {
+        els.status.textContent = error.message || "查詢失敗";
+        els.result.innerHTML = renderFailure(error);
+      } finally {
+        els.turningButton.disabled = false;
+        els.execute.disabled = false;
+      }
+    }
+
+    async function refreshAllInformation() {
+      els.refreshAll.disabled = true;
+      els.refreshAll.textContent = "更新中…";
+      els.date.value = todayYmd();
+      els.rank.value = "10";
+      els.strongResult.innerHTML = `<div class="panel empty">正在更新強勢股排行…</div>`;
+      els.turningResult.innerHTML = `<div class="panel empty">等待強勢股更新完成…</div>`;
+
+      try {
+        els.result = els.strongResult;
+        await showStrongChips();
+        els.turningResult.innerHTML = `<div class="panel empty">正在更新籌碼轉強排行…</div>`;
+        els.result = els.turningResult;
+        await showTurningChips();
+        els.status.textContent = `全部資訊更新完成 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+      } finally {
+        els.result = els.strongResult;
+        els.refreshAll.disabled = false;
+        els.refreshAll.textContent = "更新全部資訊";
+      }
+    }
+
+    els.date.value = todayYmd();
+    const saved = localStorage.getItem("stockChipCode");
+    if (saved) els.stock.value = saved;
+    els.status.textContent = "按下更新按鈕，取得最新排行。";
+    els.refreshAll.addEventListener("click", refreshAllInformation);
+  </script>
+</body>
+</html>

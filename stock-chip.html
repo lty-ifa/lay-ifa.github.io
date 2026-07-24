@@ -53,6 +53,22 @@
       border-bottom: 1px solid var(--line);
     }
 
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 16px;
+    }
+
+    .brand-copy {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      padding-left: 16px;
+      border-left: 1px solid rgba(91, 188, 255, 0.3);
+    }
+
     h1 {
       margin: 0;
       font-size: clamp(30px, 5vw, 42px);
@@ -64,9 +80,60 @@
 
     .subline {
       color: #596273;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
-      margin-top: 6px;
+      white-space: nowrap;
+    }
+
+    .data-notice {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border: 1px solid rgba(242, 184, 91, 0.42);
+      border-radius: 999px;
+      color: #e8bd73;
+      background: rgba(242, 184, 91, 0.09);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .page-notice {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+      padding: 4px 0 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 13px;
+      border: 1px solid rgba(91, 188, 255, 0.38);
+      border-radius: 9px;
+      color: #dff6ff;
+      background: rgba(91, 188, 255, 0.08);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .home-link:hover {
+      border-color: rgba(91, 188, 255, 0.75);
+      background: rgba(91, 188, 255, 0.15);
+      transform: translateY(-1px);
     }
 
     .live-mark {
@@ -781,11 +848,16 @@
 
     @media (max-width: 560px) {
       .app { width: min(100% - 16px, 1120px); padding: 10px 0 28px; }
-      .topbar { flex-direction: column; align-items: stretch; margin-bottom: 14px; padding: 8px 4px 14px; }
-      h1 { font-size: 30px; }
-      .subline { font-size: 12px; }
+      .topbar { align-items: flex-end; margin-bottom: 14px; padding: 8px 4px 14px; }
+      .brand-lockup { display: grid; gap: 7px; }
+      .brand-copy { gap: 7px; padding-left: 0; border-left: 0; }
+      h1 { font-size: 28px; }
+      .subline { font-size: 10px; }
+      .data-notice { padding: 4px 7px; font-size: 9px; }
+      .header-actions { gap: 0; }
+      .home-link { min-height: 32px; padding: 0 10px; font-size: 11px; }
       .card-head { flex-direction: column; align-items: stretch; }
-      .live-mark { align-self: flex-start; }
+      .live-mark { display: none; }
       .grid-2, .actions, .data-grid, .context-grid { grid-template-columns: 1fr; }
       .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
       .metric { min-height: 72px; padding: 11px; }
@@ -1067,7 +1139,7 @@
 
     .stock-list-metrics {
       display: grid;
-      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      grid-template-columns: repeat(2, minmax(150px, 1fr));
       gap: 10px 14px;
     }
 
@@ -1110,6 +1182,38 @@
     .stock-list-market.price-status > span { color: #e8bd73; }
     .stock-list-market.volume-status > span { color: #aaa8ff; }
 
+    .stock-list-daily {
+      grid-column: 1 / -1;
+      overflow: hidden;
+      border: 1px solid rgba(91, 188, 255, 0.18);
+      border-radius: 7px;
+      background: rgba(7, 15, 27, 0.42);
+    }
+
+    .stock-list-daily-title {
+      padding: 6px 9px;
+      color: #8fc8e8;
+      font-size: 10px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(91, 188, 255, 0.14);
+    }
+
+    .stock-list-daily-row {
+      display: grid;
+      grid-template-columns: 72px repeat(2, minmax(110px, 1fr));
+      gap: 8px;
+      padding: 5px 9px;
+      color: #dce9f5;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      border-bottom: 1px solid rgba(143, 165, 190, 0.1);
+    }
+
+    .stock-list-daily-row:last-child { border-bottom: 0; }
+    .stock-list-daily-row span { white-space: nowrap; }
+    .stock-list-daily-row span:first-child { color: #8293a9; }
+    .stock-list-daily-row b { color: #5fe6a9; font-weight: 600; }
+
     @media (max-width: 560px) {
       .result-section { margin-top: 18px; padding: 14px 10px 12px 14px; border-radius: 13px; }
       .result-section .result-heading { padding: 0 0 11px; }
@@ -1120,17 +1224,28 @@
       .stock-list-metrics { grid-column: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; }
       .stock-list-metric strong { font-size: 11px; }
       .stock-list-market { grid-column: 1 / -1; }
+      .stock-list-daily-row {
+        grid-template-columns: 50px repeat(2, minmax(0, 1fr));
+        gap: 5px;
+        padding: 5px 7px;
+        font-size: 10px;
+      }
     }
   </style>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <div>
+      <div class="brand-lockup">
         <h1>台股籌碼雷達</h1>
-        <div class="subline">法人動向 · 連續買超 · 價量狀態</div>
+        <div class="brand-copy">
+          <div class="subline">外資投信 · 連續買超 · 股價趨勢</div>
+        </div>
       </div>
-      <div class="live-mark">Market Intelligence</div>
+      <div class="header-actions">
+        <div class="live-mark">Market Intelligence</div>
+        <a class="home-link" href="index.html">回首頁</a>
+      </div>
     </header>
 
     <section class="layout">
@@ -1179,6 +1294,9 @@
 
       </section>
     </section>
+    <footer class="page-notice">
+      <div class="data-notice">公開資料整理，僅供參考使用</div>
+    </footer>
   </main>
 
   <script>
@@ -1581,7 +1699,6 @@
           name: String(row[idx["證券名稱"]]).trim(),
           foreign: toNum(row[idx["外陸資買賣超股數(不含外資自營商)"]]),
           trust: toNum(row[idx["投信買賣超股數"]]),
-          dealer: toNum(row[idx["自營商買賣超股數"]]),
           total: toNum(row[idx["三大法人買賣超股數"]]),
         }));
       return { date: data.date, rows };
@@ -1626,10 +1743,26 @@
         .map((row) => ({
           code: String(row[idx["證券代號"]]).trim(),
           close: toNum(row[idx["收盤價"]]),
+          high: toNum(row[idx["最高價"]]),
+          low: toNum(row[idx["最低價"]]),
           volume: toNum(row[idx["成交股數"]]),
         }))
-        .filter((row) => row.close > 0 && row.volume > 0);
+        .filter((row) => row.close > 0 && row.high > 0 && row.low > 0 && row.volume > 0);
       return { date: data.date, rows };
+    }
+
+    function classifyFiveDayPrice(quotes) {
+      if (quotes.length < 5) return { label: "資料不足", tone: "", changePct: null, rangePct: null };
+      const firstClose = quotes[0].close;
+      const latestClose = quotes[quotes.length - 1].close;
+      const highest = Math.max(...quotes.map((quote) => quote.high));
+      const lowest = Math.min(...quotes.map((quote) => quote.low));
+      const changePct = (latestClose - firstClose) / firstClose * 100;
+      const rangePct = (highest - lowest) / lowest * 100;
+      if (changePct > 2) return { label: "走強", tone: "positive", changePct, rangePct };
+      if (changePct < -2) return { label: "走弱", tone: "negative", changePct, rangePct };
+      if (rangePct <= 5) return { label: "橫盤整理", tone: "", changePct, rangePct };
+      return { label: "寬幅震盪", tone: "", changePct, rangePct };
     }
 
     async function fetchMarketDay(date) {
@@ -1723,7 +1856,6 @@
           <div class="data-grid">
             <div class="cell"><span>外資</span><strong class="${signedClass(inst?.foreign)}">${inst ? signed(inst.foreign) : "--"}</strong></div>
             <div class="cell"><span>投信</span><strong class="${signedClass(inst?.trust)}">${inst ? signed(inst.trust) : "--"}</strong></div>
-            <div class="cell"><span>自營商</span><strong class="${signedClass(inst?.dealer)}">${inst ? signed(inst.dealer) : "--"}</strong></div>
             <div class="cell"><span>三大法人</span><strong class="${signedClass(inst?.total)}">${inst ? signed(inst.total) : "--"}</strong></div>
             <div class="cell"><span>融資餘額</span><strong>${margin ? fmtNum(margin.marginNow) : "--"}</strong></div>
             <div class="cell"><span>融資變化</span><strong class="${signedClass(margin?.marginChange)}">${margin ? signed(margin.marginChange) : "--"}</strong></div>
@@ -1787,22 +1919,18 @@
         const ymd = (els.date.value || todayYmd()).replace(/\D/g, "");
         els.date.value = ymd;
         const n = Math.max(3, Math.min(30, Number(els.rank.value) || 10));
-        const lookbackDays = 20;
+        const lookbackDays = 14;
         els.status.textContent = `抓取最近 ${lookbackDays} 個交易日法人資料`;
 
         const days = await fetchRecentInstitutionalDays(lookbackDays, ymd);
         if (days.length < 2) throw new Error("無法取得足夠交易日資料");
 
         const latestDate = days[days.length - 1].date;
-        const previousDate = days[days.length - 2].date;
-        els.status.textContent = "抓取最近 2 個交易日股價與成交量";
-        let previousMarket = null;
-        let latestMarket = null;
+        const marketDates = days.slice(-5).map((day) => day.date);
+        els.status.textContent = "抓取最近 5 個交易日股價與成交量";
+        let marketDays = [];
         try {
-          [previousMarket, latestMarket] = await Promise.all([
-            fetchMarketDay(previousDate),
-            fetchMarketDay(latestDate),
-          ]);
+          marketDays = (await Promise.all(marketDates.map(fetchMarketDay))).filter(Boolean);
         } catch (error) {
           addApiDebug("TWSE 每日行情", "skip", "價量資料暫時無法取得，仍照法人連買條件顯示");
         }
@@ -1810,8 +1938,9 @@
         lastInst = days[days.length - 1];
 
         const maps = days.map((day) => new Map(day.rows.map((row) => [row.code, row])));
-        const previousMarketMap = new Map((previousMarket?.rows || []).map((row) => [row.code, row]));
-        const latestMarketMap = new Map((latestMarket?.rows || []).map((row) => [row.code, row]));
+        const marketMaps = marketDays.map((day) => new Map(day.rows.map((row) => [row.code, row])));
+        const previousMarketMap = marketMaps[marketMaps.length - 2] || new Map();
+        const latestMarketMap = marketMaps[marketMaps.length - 1] || new Map();
         const rows = [];
 
         for (const latest of days[days.length - 1].rows) {
@@ -1819,17 +1948,25 @@
           const instRows = maps.map((map) => map.get(code));
           const previousQuote = previousMarketMap.get(code);
           const latestQuote = latestMarketMap.get(code);
+          const fiveDayQuotes = marketMaps.map((map) => map.get(code)).filter(Boolean);
+          const priceStatus = classifyFiveDayPrice(fiveDayQuotes);
           if (isEtfLikeCode(code)) continue;
           if (!instRows.every(Boolean)) continue;
           let consecutiveBuyDays = 0;
           let streakForeign = 0;
           let streakTrust = 0;
+          const dailyBuys = [];
           for (let i = instRows.length - 1; i >= 0; i -= 1) {
             const row = instRows[i];
             if (!row || row.foreign <= 0 || row.trust <= 0) break;
             consecutiveBuyDays += 1;
             streakForeign += row.foreign;
             streakTrust += row.trust;
+            dailyBuys.push({
+              date: days[i].date,
+              foreign: row.foreign,
+              trust: row.trust,
+            });
           }
           if (!consecutiveBuyDays) continue;
           rows.push({
@@ -1841,18 +1978,14 @@
             consecutiveBuyDays,
             streakForeign,
             streakTrust,
-            trust: latest.trust,
-            dealer: latest.dealer,
+            dailyBuys,
             close: latestQuote?.close ?? null,
-            priceChangePct: previousQuote && latestQuote
-              ? (latestQuote.close - previousQuote.close) / previousQuote.close * 100
-              : null,
+            priceStatus,
             volume: latestQuote?.volume ?? null,
             volumeChangePct: previousQuote && latestQuote
               ? (latestQuote.volume - previousQuote.volume) / previousQuote.volume * 100
               : null,
-            latestTotal: latest.total,
-            latestForeign: latest.foreign,
+            latestTotal: latest.foreign + latest.trust,
           });
         }
 
@@ -1876,7 +2009,7 @@
         els.result.innerHTML = `
           <article class="compact-list">
             <div class="compact-list-head">
-              <div class="card-sub">排除 ETF，依外資與投信同日連續買超天數排序；股價與成交量只顯示狀態，不影響入選。</div>
+              <div class="card-sub">排除 ETF，依外資與投信同日連續買超天數排序；股價以最近 5 日判斷，價量狀態不影響入選。</div>
               <span class="badge good">${days[0].date}~${latestDate}</span>
             </div>
             ${topRows.map((row, index) => `
@@ -1887,11 +2020,18 @@
                   <span>外資投信連買 ${row.consecutiveBuyDays} 天</span>
                 </div>
                 <div class="stock-list-metrics">
-                  <div class="stock-list-metric"><span>外資</span><strong class="${signedClass(row.latestForeign)}">${signed(row.latestForeign)}</strong></div>
-                  <div class="stock-list-metric"><span>投信</span><strong class="${signedClass(row.trust)}">${signed(row.trust)}</strong></div>
-                  <div class="stock-list-metric"><span>自營商</span><strong class="${signedClass(row.dealer)}">${signed(row.dealer)}</strong></div>
-                  <div class="stock-list-metric stock-list-market price-status"><span>股價狀態</span><strong class="${signedClass(row.priceChangePct)}">${fmtPrice(row.close)} · ${row.priceChangePct > 0 ? `上漲 ${signedPct(row.priceChangePct)}` : row.priceChangePct < 0 ? `下跌 ${signedPct(row.priceChangePct)}` : Number.isFinite(row.priceChangePct) ? "持平" : "無資料"}</strong></div>
+                  <div class="stock-list-metric stock-list-market price-status"><span>股價狀態（近 5 日）</span><strong class="${row.priceStatus.tone}">${fmtPrice(row.close)} · ${row.priceStatus.label}${Number.isFinite(row.priceStatus.changePct) ? ` ${signedPct(row.priceStatus.changePct)}` : ""}</strong></div>
                   <div class="stock-list-metric stock-list-market volume-status"><span>成交量狀態</span><strong class="${signedClass(row.volumeChangePct)}">${Number.isFinite(row.volume) ? `${fmtNum(row.volume / 1000)} 張 · ` : ""}${row.volumeChangePct > 0 ? `量增 ${signedPct(row.volumeChangePct)}` : row.volumeChangePct < 0 ? `量縮 ${signedPct(row.volumeChangePct)}` : Number.isFinite(row.volumeChangePct) ? "持平" : "無資料"}</strong></div>
+                  <div class="stock-list-daily">
+                    <div class="stock-list-daily-title">連買期間逐日買超量</div>
+                    ${row.dailyBuys.map((day) => `
+                      <div class="stock-list-daily-row">
+                        <span>${day.date.slice(4, 6)}/${day.date.slice(6, 8)}</span>
+                        <span>外資 <b>${signed(day.foreign / 1000)} 張</b></span>
+                        <span>投信 <b>${signed(day.trust / 1000)} 張</b></span>
+                      </div>
+                    `).join("")}
+                  </div>
                 </div>
               </div>
             `).join("")}

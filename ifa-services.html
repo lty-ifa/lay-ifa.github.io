@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="認識 IFA 獨立財務規劃顧問的工作內容、可解決的財務痛點，以及從現況盤點到持續追蹤的完整服務。">
+  <title>IFA 財務規劃顧問｜把人生目標變成可執行的財務計畫</title>
+  <style>
+    :root {
+      --navy-950: #071522;
+      --navy-900: #0b1d2e;
+      --navy-800: #132b42;
+      --navy-700: #1b3a55;
+      --gold: #c8a66a;
+      --gold-light: #ead8b0;
+      --paper: #f4f1e9;
+      --paper-soft: #faf8f2;
+      --ink: #102234;
+      --muted: #66717b;
+      --line: rgba(16, 34, 52, .12);
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.7;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    .hero {
+      position: relative;
+      min-height: 760px;
+      overflow: hidden;
+      color: var(--white);
+      background:
+        radial-gradient(circle at 78% 24%, rgba(200,166,106,.22), transparent 24rem),
+        radial-gradient(circle at 15% 76%, rgba(65,138,161,.17), transparent 27rem),
+        linear-gradient(145deg, var(--navy-950), #0d263b 62%, #153b53);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .34;
+      background-image:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, #000, transparent 85%);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -170px;
+      bottom: -300px;
+      width: 680px;
+      height: 680px;
+      border: 1px solid rgba(234,216,176,.26);
+      border-radius: 50%;
+      box-shadow: 0 0 0 70px rgba(234,216,176,.035), 0 0 0 140px rgba(234,216,176,.022);
+    }
+    .nav {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 76px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .brand { color: var(--gold-light); font-size: 12px; font-weight: 800; letter-spacing: .15em; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a { color: #c6d0da; font-size: 13px; text-decoration: none; }
+    .nav-links a:hover { color: var(--gold-light); }
+    .nav-cta { padding: 9px 14px; border: 1px solid rgba(234,216,176,.38); border-radius: 999px; }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+      gap: 70px;
+      align-items: center;
+      min-height: 610px;
+      padding: 70px 0 110px;
+    }
+    .eyebrow { color: var(--gold); font-size: 11px; font-weight: 850; letter-spacing: .18em; }
+    h1 {
+      max-width: 760px;
+      margin: 18px 0 24px;
+      font-size: clamp(38px, 5.4vw, 64px);
+      line-height: 1.08;
+      letter-spacing: -.055em;
+      text-wrap: balance;
+    }
+    .hero-lead { max-width: 650px; margin: 0; color: #bdc9d5; font-size: clamp(16px, 2vw, 19px); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 21px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { color: #0a1a29; background: linear-gradient(135deg, var(--gold-light), var(--gold)); }
+    .btn-ghost { color: #e5ebf1; border: 1px solid rgba(255,255,255,.25); }
+    .hero-card {
+      position: relative;
+      padding: 30px;
+      background: rgba(8,24,39,.6);
+      border: 1px solid rgba(234,216,176,.23);
+      border-radius: 24px;
+      box-shadow: 0 28px 70px rgba(0,0,0,.28);
+      backdrop-filter: blur(16px);
+    }
+    .hero-card-title { margin-bottom: 16px; color: var(--gold-light); font-size: 13px; font-weight: 800; }
+    .hero-card ul { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+    .hero-card li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; color: #c7d1db; font-size: 14px; }
+    .hero-card li::before {
+      content: "✓";
+      display: grid;
+      place-items: center;
+      width: 25px;
+      height: 25px;
+      color: var(--gold-light);
+      background: rgba(200,166,106,.12);
+      border: 1px solid rgba(200,166,106,.26);
+      border-radius: 50%;
+      font-size: 11px;
+    }
+
+    .difference { position: relative; z-index: 3; margin-top: -66px; }
+    .difference-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      overflow: hidden;
+      background: var(--white);
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(18,39,58,.14);
+    }
+    .difference-title { padding: 40px; color: var(--white); background: var(--navy-800); }
+    .difference-title h2 { max-width: 500px; margin: 8px 0 0; font-size: clamp(27px, 3.6vw, 36px); line-height: 1.28; letter-spacing: -.03em; text-wrap: balance; }
+    .difference-copy { padding: 40px; }
+    .difference-copy p { margin: 0 0 20px; color: var(--muted); }
+    .difference-points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .difference-point { padding: 15px; background: var(--paper-soft); border: 1px solid var(--line); border-radius: 12px; }
+    .difference-point strong { display: block; margin-bottom: 3px; font-size: 14px; }
+    .difference-point span { color: var(--muted); font-size: 12px; }
+
+    .section { padding: 108px 0; }
+    .section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; margin-bottom: 44px; }
+    .section h2 { max-width: 560px; margin: 10px 0 0; font-size: clamp(31px, 4.2vw, 46px); line-height: 1.2; letter-spacing: -.04em; text-wrap: balance; }
+    .section-intro { align-self: end; margin: 0; color: var(--muted); font-size: 16px; }
+
+    .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .pain-card { padding: 26px; background: var(--paper-soft); border: 1px solid var(--line); border-radius: 16px; }
+    .pain-no { color: var(--gold); font-size: 11px; font-weight: 850; letter-spacing: .12em; }
+    .pain-card h3 { margin: 13px 0 8px; font-size: 19px; line-height: 1.35; }
+    .pain-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .services { color: #edf2f6; background: var(--navy-950); }
+    .services .section-intro { color: #9faebb; }
+    .service-list { border-top: 1px solid rgba(255,255,255,.12); }
+    .service {
+      display: grid;
+      grid-template-columns: 90px minmax(220px, .8fr) 1.2fr;
+      gap: 34px;
+      padding: 38px 0;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .service-no { color: var(--gold); font-size: 13px; font-weight: 850; letter-spacing: .14em; }
+    .service h3 { margin: 0 0 8px; color: #f0d5a1; font-size: 24px; line-height: 1.3; }
+    .service-persona {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 4px 9px;
+      color: var(--gold-light);
+      background: rgba(200,166,106,.1);
+      border: 1px solid rgba(200,166,106,.28);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+    .service-tag { color: var(--gold-light); font-size: 12px; }
+    .service-detail { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .detail-item { padding-left: 15px; border-left: 1px solid rgba(200,166,106,.3); }
+    .detail-label { margin-bottom: 6px; color: #7f91a1; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+    .detail-item p { margin: 0; color: #c1cbd4; font-size: 13px; }
+
+    .value-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 16px; }
+    .value-main, .value-side { border-radius: 22px; }
+    .value-main { padding: 42px; color: var(--white); background: var(--navy-800); }
+    .value-main blockquote { margin: 0; font-size: clamp(25px, 4vw, 40px); font-weight: 780; line-height: 1.35; letter-spacing: -.03em; }
+    .value-main p { max-width: 650px; margin: 24px 0 0; color: #b8c5d1; }
+    .value-side { display: grid; gap: 1px; overflow: hidden; background: var(--line); border: 1px solid var(--line); }
+    .value-item { padding: 20px 22px; background: var(--paper-soft); }
+    .value-item strong { display: block; margin-bottom: 4px; }
+    .value-item span { color: var(--muted); font-size: 13px; }
+
+    .process { padding-top: 0; }
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .step { position: relative; padding: 22px; background: #fff; border: 1px solid var(--line); border-radius: 15px; }
+    .step::after { content: "→"; position: absolute; top: 50%; right: -13px; z-index: 2; color: var(--gold); }
+    .step:last-child::after { display: none; }
+    .step-no { color: var(--gold); font-size: 11px; font-weight: 850; }
+    .step h3 { margin: 12px 0 6px; font-size: 16px; }
+    .step p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .cta { padding: 76px 0; color: var(--white); background: var(--navy-800); }
+    .cta-inner { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; }
+    .cta h2 { max-width: 720px; margin: 7px 0 0; font-size: clamp(30px, 5vw, 48px); line-height: 1.18; letter-spacing: -.04em; text-wrap: balance; }
+    .footer { padding: 26px 0; color: #81909d; background: var(--navy-950); font-size: 11px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 20px; }
+    .disclaimer { max-width: 730px; }
+
+    @media (max-width: 900px) {
+      .hero-content, .section-head, .difference-card, .value-grid { grid-template-columns: 1fr; }
+      .hero-content { gap: 34px; padding-top: 48px; }
+      .hero-card { max-width: 560px; }
+      .difference-title, .difference-copy { padding: 30px; }
+      .pain-grid { grid-template-columns: repeat(2, 1fr); }
+      .service { grid-template-columns: 60px 1fr; }
+      .service-detail { grid-column: 2; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .step::after { display: none; }
+    }
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 28px, 1120px); }
+      .hero { min-height: auto; }
+      .nav { min-height: 64px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .hero-content { min-height: 0; padding: 54px 0 120px; }
+      h1 { font-size: 37px; }
+      .hero-card { padding: 24px 20px; }
+      .difference { margin-top: -72px; }
+      .difference-title, .difference-copy { padding: 24px 20px; }
+      .difference-points, .pain-grid, .service-detail, .steps { grid-template-columns: 1fr; }
+      .section { padding: 78px 0; }
+      .section-head { gap: 18px; margin-bottom: 30px; }
+      .service { grid-template-columns: 38px 1fr; gap: 14px; padding: 30px 0; }
+      .service-detail { grid-column: 1 / -1; margin-top: 6px; }
+      .detail-item { padding: 13px 0 0; border-top: 1px solid rgba(200,166,106,.22); border-left: 0; }
+      .value-main { padding: 30px 24px; }
+      .cta-inner { grid-template-columns: 1fr; }
+      .cta-inner .btn { justify-self: start; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav wrap" aria-label="主要導覽">
+      <a class="brand" href="index.html">ELY · INDEPENDENT FINANCIAL ADVISOR</a>
+      <div class="nav-links">
+        <a href="#services">服務內容</a>
+        <a href="#process">合作流程</a>
+        <a class="nav-cta" href="booking.html">預約諮詢</a>
+      </div>
+    </nav>
+    <div class="hero-content wrap">
+      <div>
+        <div class="eyebrow">INDEPENDENT FINANCIAL ADVISOR</div>
+        <h1>資產愈多，愈需要有人看見全局。</h1>
+        <p class="hero-lead">當財富分散在公司股權、房產、投資、保單與不同家庭成員名下，真正困難的已不是買什麼，而是每個決定會不會影響現金流、稅務、家人與下一代。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#services">查看完整服務</a>
+          <a class="btn btn-ghost" href="booking.html">預約初談</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="IFA 的核心工作">
+        <div class="hero-card-title">IFA 的核心工作</div>
+        <ul>
+          <li>整合公司股權、房產、投資與家庭資產</li>
+          <li>先看稅務、現金流與傳承影響，再做決定</li>
+          <li>協調會計師、律師、銀行與保險等專業</li>
+          <li>重大決策前多一層檢查，避免局部最佳</li>
+        </ul>
+      </aside>
+    </div>
+  </header>
+
+  <main>
+    <section class="difference wrap" aria-labelledby="differenceTitle">
+      <div class="difference-card">
+        <div class="difference-title">
+          <div class="eyebrow">THE DIFFERENCE</div>
+          <h2 id="differenceTitle">財務規劃，和單一商品建議有什麼不同？</h2>
+        </div>
+        <div class="difference-copy">
+          <p>單一商品回答的是「買什麼」；完整財務規劃先回答「你現在在哪裡、要去哪裡、承受得起什麼」，再決定需要哪些工具，以及哪些其實不需要。</p>
+          <div class="difference-points">
+            <div class="difference-point"><strong>以人為中心</strong><span>從家庭、價值觀與目標開始</span></div>
+            <div class="difference-point"><strong>全局整合</strong><span>避免各項決策彼此衝突</span></div>
+            <div class="difference-point"><strong>可執行</strong><span>明確知道下一步先做什麼</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" aria-labelledby="painTitle">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">CLIENT PAIN POINTS</div>
+          <h2 id="painTitle">高資產家庭最怕的，不是沒賺到，而是沒安排好。</h2>
+        </div>
+        <p class="section-intro">資產分別由不同銀行、券商、會計師或家人處理，每個人都只看到一部分。真正的風險，往往藏在這些部分彼此沒有連起來的地方。</p>
+      </div>
+      <div class="pain-grid">
+        <article class="pain-card"><div class="pain-no">01 · 企業主</div><h3>公司很有價值，個人卻缺少現金</h3><p>大部分身價都在未上市股權與不動產裡，臨時需要資金時，只能借款或被迫出售資產。</p></article>
+        <article class="pain-card"><div class="pain-no">02 · 高階主管</div><h3>財富過度集中在同一家公司</h3><p>薪資、獎金、員工持股與退休金都和公司表現綁在一起，一個事件可能同時影響工作與資產。</p></article>
+        <article class="pain-card"><div class="pain-no">03 · 多房產家庭</div><h3>帳面資產很多，持有成本也很高</h3><p>房貸、稅費、修繕與家庭支出同時發生，資產升值不代表每年的現金流足夠。</p></article>
+        <article class="pain-card"><div class="pain-no">04 · 跨機構資產</div><h3>每家銀行都說配置完整，加總後卻重複</h3><p>不同機構推薦相似商品，整體曝險、費用與真正可動用的資金沒有人統一計算。</p></article>
+        <article class="pain-card"><div class="pain-no">05 · 家族傳承</div><h3>資產怎麼分，開口比計算更難</h3><p>接班、照顧與公平不一定等於平均；沒有提早談清楚，資產可能變成家人衝突的來源。</p></article>
+        <article class="pain-card"><div class="pain-no">06 · 重大變現</div><h3>出售公司或房產後，不知道下一步</h3><p>一次取得大筆資金，接下來的稅務、投資、贈與與生活安排都需要在短時間內做決定。</p></article>
+      </div>
+    </section>
+
+    <section class="section services" id="services" aria-labelledby="serviceTitle">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">SERVICE MENU</div>
+            <h2 id="serviceTitle">不是更多商品，而是讓龐大資產彼此配合。</h2>
+          </div>
+          <p class="section-intro">以下以企業主、高階主管、多房產與準備傳承的家庭為例。服務可以單項進行，也可以整合成一份家庭財富藍圖。</p>
+        </div>
+        <div class="service-list">
+          <article class="service">
+            <div class="service-no">01</div>
+            <div><div class="service-persona">創業企業主</div><h3>公司很成功，家庭財富卻沒有獨立</h3><div class="service-tag">把公司與個人資產分開管理，也放在一起決策</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>大部分身價都在公司股權，個人名下還有房產、投資與保單，但家庭生活仍高度依賴公司。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>整合家庭成員名下的資產、負債、現金流、持有成本與重要文件，標出集中、重複和缺口。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>重大決策前能先看見全局；家人也知道資產在哪裡、由誰管理，以及需要處理哪些事情。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">02</div>
+            <div><div class="service-persona">多房產家庭</div><h3>房子很多，真正能用的現金卻不多</h3><div class="service-tag">讓租金、貸款、稅費與家庭支出彼此配合</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>名下有自住、收租與家族房產，帳面價值很高，卻同時面臨房貸、稅費、修繕和子女資金需求。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>逐間整理現金流、持有成本、貸款與未來用途，安排可動用資金並比較保留、出租或處分方案。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>知道每間房產是在創造現金還是消耗現金，需要大筆資金時也不必倉促出售最有價值的資產。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">03</div>
+            <div><div class="service-persona">上市櫃高階主管</div><h3>收入與身價都押在同一家公司</h3><div class="service-tag">保留公司成長機會，也避免工作與資產一起受創</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>薪資、獎金、員工持股與未來退休安排都和公司表現綁在一起，部位又受到閉鎖期或內規限制。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>把公司股權、房產、公開市場與其他投資放在同一風險圖上，測試市場與本業同時下跌的影響。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>清楚知道能承受多少集中部位，以及要分散到什麼程度，避免工作收入和家庭資產同時受創。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">04</div>
+            <div><div class="service-persona">高收入專業人士</div><h3>很會賺錢，卻沒有時間整合財務決策</h3><div class="service-tag">把稅務、投資與家庭安排放進同一個年度計畫</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>醫師、律師或專業合夥人收入高、時間少，投資與保單由不同人處理，通常只在申報前才想到稅務。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>把年度收入、大額支出、投資變現與家人贈與排在同一時間表，並和會計師確認稅務影響。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>不用自己追蹤每個專業窗口，也能在交易前知道可能的成本，讓高收入真正轉化為可累積的家庭資產。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">05</div>
+            <div><div class="service-persona">企業出售後的新富族群</div><h3>突然擁有大筆現金，選擇反而更多更難</h3><div class="service-tag">先把未來安排好，再決定資金要去哪裡</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>出售企業或股權後一次取得大筆資金，短時間內收到許多投資提案，卻還沒想清楚下一階段生活。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>先保留稅款與必要現金，設定分批投入時程，再依家庭目標比較不同資產配置情境。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>降低一次把大筆資金放錯位置的風險，也讓你有時間看懂選項，而不是在壓力下被迫決定。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">06</div>
+            <div><div class="service-persona">準備交棒的家族一代</div><h3>想把財富交出去，又怕家族失去方向</h3><div class="service-tag">安排的不只是財產，還包括控制權、責任與家族價值</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>有些子女參與企業、有些沒有；創辦人想逐步交棒，卻擔心失去控制、分配不公或家人因此衝突。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>釐清你想保留的價值、控制權與照顧安排，協助家族對話，再和律師、會計師設計執行方式。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>下一代提早理解責任與安排，家人不用在最混亂的時候猜測你的意思，企業也更容易穩定交接。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">07</div>
+            <div><div class="service-persona">接班中的第二代</div><h3>接到的不只是資產，還有上一代的期待</h3><div class="service-tag">把想改變的事與必須保留的責任說清楚</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>第二代開始參與家族資產或企業決策，但權責、資訊與溝通方式仍由上一代掌握，很難真正承接。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>協助整理家族資產、決策流程與待解問題，建立定期家族會議，讓兩代逐步確認權責與時間表。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>第二代有機會在真正接手前練習決策，上一代也能逐步確認能力，不必等到緊急狀況才被迫交接。</p></div>
+            </div>
+          </article>
+          <article class="service">
+            <div class="service-no">08</div>
+            <div><div class="service-persona">跨國生活家庭</div><h3>家人住在不同國家，資產也跨越不同制度</h3><div class="service-tag">讓居住、投資、稅務與傳承安排彼此不衝突</div></div>
+            <div class="service-detail">
+              <div class="detail-item"><div class="detail-label">你的情境</div><p>父母在台灣、子女在海外，家庭同時持有不同地區的帳戶、房產或企業權益，資訊分散且規則不同。</p></div>
+              <div class="detail-item"><div class="detail-label">我們會做</div><p>整理家庭成員的居住地、資產所在地與未來移動計畫，再協調各地合格稅務與法律專業。</p></div>
+              <div class="detail-item"><div class="detail-label">具體價值</div><p>跨境匯款、投資或傳承前先確認影響，降低重複安排、申報疏漏與家人不知道如何接手的風險。</p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" aria-labelledby="valueTitle">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">THE VALUE</div>
+          <h2 id="valueTitle">顧問提供的，是更好的決策品質。</h2>
+        </div>
+        <p class="section-intro">真正的價值不只是一份報告，而是在重要選擇出現時，你有一套不被雜訊帶走的判斷方法。</p>
+      </div>
+      <div class="value-grid">
+        <div class="value-main">
+          <blockquote>「讓你的每一個財務決定，都能回到自己真正想要的人生。」</blockquote>
+          <p>把模糊焦慮變成數字，把零散選項變成順序，把一次性的建議變成能持續調整的系統。</p>
+        </div>
+        <div class="value-side">
+          <div class="value-item"><strong>看見全貌</strong><span>知道每個決策如何影響其他目標。</span></div>
+          <div class="value-item"><strong>降低盲點</strong><span>用情境分析提早發現風險與不足。</span></div>
+          <div class="value-item"><strong>節省決策成本</strong><span>建立篩選標準，不再被資訊淹沒。</span></div>
+          <div class="value-item"><strong>提高執行力</strong><span>把大目標拆成可以開始的小步驟。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section process wrap" id="process" aria-labelledby="processTitle">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">HOW IT WORKS</div>
+          <h2 id="processTitle">合作流程</h2>
+        </div>
+        <p class="section-intro">先確認需求與合作範圍，再進入資料盤點與規劃；每一步都讓你知道目前在解決什麼問題。</p>
+      </div>
+      <div class="steps">
+        <article class="step"><div class="step-no">STEP 01</div><h3>需求初談</h3><p>理解你最在意的問題、期待與時程。</p></article>
+        <article class="step"><div class="step-no">STEP 02</div><h3>資料盤點</h3><p>整理財務資料、家庭責任與人生目標。</p></article>
+        <article class="step"><div class="step-no">STEP 03</div><h3>分析規劃</h3><p>量化缺口、模擬情境並設計優先順序。</p></article>
+        <article class="step"><div class="step-no">STEP 04</div><h3>方案說明</h3><p>逐項討論取捨，確認可接受的執行版本。</p></article>
+        <article class="step"><div class="step-no">STEP 05</div><h3>追蹤調整</h3><p>依實際進度與人生變化持續修正。</p></article>
+      </div>
+    </section>
+  </main>
+
+  <section class="cta">
+    <div class="cta-inner wrap">
+      <div>
+        <div class="eyebrow">START WITH CLARITY</div>
+        <h2>先不用急著做決定，從把問題說清楚開始。</h2>
+      </div>
+      <a class="btn btn-primary" href="booking.html">預約財務諮詢</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner wrap">
+      <div>ELY · INDEPENDENT FINANCIAL ADVISOR</div>
+      <div class="disclaimer">本頁為財務規劃服務說明，不構成個別投資、保險、法律或稅務建議；實際規劃應依個人資料及適用法規評估，必要時由合格專業人士提供意見。</div>
+    </div>
+  </footer>
+</body>
+</html>

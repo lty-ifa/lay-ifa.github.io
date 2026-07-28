@@ -1106,6 +1106,8 @@
       border-bottom: 1px solid rgba(91, 188, 255, 0.22);
     }
 
+    .compact-list-head .card-sub { min-width: 0; }
+
     .stock-list-row {
       display: grid;
       grid-template-columns: 42px minmax(130px, 180px) minmax(0, 1fr);
@@ -1129,19 +1131,25 @@
       white-space: nowrap;
     }
 
+    .stock-list-name { min-width: 0; }
+
     .stock-list-name span {
       display: block;
       margin-top: 3px;
       color: #91a0b5;
       font-size: 11px;
-      white-space: nowrap;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
     }
 
     .stock-list-metrics {
       display: grid;
       grid-template-columns: repeat(2, minmax(150px, 1fr));
       gap: 10px 14px;
+      min-width: 0;
     }
+
+    .stock-list-metric { min-width: 0; }
 
     .stock-list-metric span {
       display: block;
@@ -1156,8 +1164,10 @@
       font-size: 12px;
       overflow-wrap: anywhere;
       font-variant-numeric: tabular-nums;
-      white-space: nowrap;
+      line-height: 1.45;
     }
+
+    .stock-list-metric.flow-summary { grid-column: 1 / -1; }
 
     .stock-list-metric strong.positive { color: #5fe6a9; }
     .stock-list-metric strong.negative { color: #ff7f96; }
@@ -1200,7 +1210,7 @@
 
     .stock-list-daily-row {
       display: grid;
-      grid-template-columns: 72px repeat(2, minmax(110px, 1fr));
+      grid-template-columns: 72px repeat(2, minmax(0, 1fr));
       gap: 8px;
       padding: 5px 9px;
       color: #dce9f5;
@@ -1210,20 +1220,34 @@
     }
 
     .stock-list-daily-row:last-child { border-bottom: 0; }
-    .stock-list-daily-row span { white-space: nowrap; }
+    .stock-list-daily-row span { min-width: 0; white-space: nowrap; }
     .stock-list-daily-row span:first-child { color: #8293a9; }
     .stock-list-daily-row b { color: #5fe6a9; font-weight: 600; }
+
+    @media (max-width: 820px) {
+      .stock-list-row {
+        grid-template-columns: 34px minmax(0, 1fr);
+        align-items: start;
+      }
+      .stock-list-metrics {
+        grid-column: 2;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
 
     @media (max-width: 560px) {
       .result-section { margin-top: 18px; padding: 14px 10px 12px 14px; border-radius: 13px; }
       .result-section .result-heading { padding: 0 0 11px; }
-      .result-title { gap: 7px; }
+      .result-heading { align-items: flex-start; gap: 5px; }
+      .result-title { gap: 7px; line-height: 1.35; }
       .result-title::before { min-width: 30px; height: 24px; }
       .compact-list-head { align-items: flex-start; flex-direction: column; }
       .stock-list-row { grid-template-columns: 30px minmax(0, 1fr); gap: 7px; padding: 13px 10px; }
       .stock-list-metrics { grid-column: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; }
       .stock-list-metric strong { font-size: 11px; }
       .stock-list-market { grid-column: 1 / -1; }
+      .dashboard-controls { align-items: stretch; flex-direction: column; }
+      .dashboard-controls .refresh-all { width: 100%; }
       .stock-list-daily-row {
         grid-template-columns: 50px repeat(2, minmax(0, 1fr));
         gap: 5px;
@@ -1239,7 +1263,7 @@
       <div class="brand-lockup">
         <h1>台股籌碼雷達</h1>
         <div class="brand-copy">
-          <div class="subline">外資投信 · 連續買超 · 股價趨勢</div>
+          <div class="subline">法人資金 · 方向加速 · 價格未發動</div>
         </div>
       </div>
       <div class="header-actions">
@@ -1253,9 +1277,9 @@
         <div class="panel dashboard-controls">
           <div>
             <h2>每日籌碼快照</h2>
-            <p>同步法人與價量狀態，更新強勢股前 10 名排行。</p>
+            <p>追蹤法人資金集中方向，找出仍在窄幅整理的前 10 名股票。</p>
           </div>
-          <button id="refreshAllButton" class="primary refresh-all">更新強勢股</button>
+          <button id="refreshAllButton" class="primary refresh-all">更新資金方向</button>
         </div>
 
         <div class="hidden-controls" aria-hidden="true">
@@ -1286,8 +1310,8 @@
 
         <section class="result-section strong-zone" aria-labelledby="strongResultTitle">
           <div class="result-heading">
-            <h2 class="result-title" id="strongResultTitle">強勢股前 10 名</h2>
-            <span>STRONG CHIPS</span>
+            <h2 class="result-title" id="strongResultTitle">資金轉向未發動前 10 名</h2>
+            <span>EARLY MONEY FLOW</span>
           </div>
           <div id="strongResult"><div class="panel empty">尚未更新</div></div>
         </section>
@@ -1340,8 +1364,8 @@
         status: "輸入股票代號與日期後查詢。",
       },
       strong: {
-        title: "強勢股",
-        action: "篩選強勢股",
+        title: "資金方向",
+        action: "篩選資金方向",
         showStock: false,
         showRank: true,
         status: "選擇日期與顯示筆數後篩選。",
@@ -1952,32 +1976,41 @@
           const priceStatus = classifyFiveDayPrice(fiveDayQuotes);
           if (isEtfLikeCode(code)) continue;
           if (!instRows.every(Boolean)) continue;
-          let consecutiveBuyDays = 0;
-          let streakForeign = 0;
-          let streakTrust = 0;
-          const dailyBuys = [];
-          for (let i = instRows.length - 1; i >= 0; i -= 1) {
-            const row = instRows[i];
-            if (!row || row.foreign <= 0 || row.trust <= 0) break;
-            consecutiveBuyDays += 1;
-            streakForeign += row.foreign;
-            streakTrust += row.trust;
-            dailyBuys.push({
-              date: days[i].date,
-              foreign: row.foreign,
-              trust: row.trust,
-            });
-          }
-          if (!consecutiveBuyDays) continue;
+          if (fiveDayQuotes.length < 5 || priceStatus.label !== "橫盤整理") continue;
+
+          const recentFiveInst = instRows.slice(-5);
+          const recentThreeInst = instRows.slice(-3);
+          const previousThreeInst = instRows.slice(-6, -3);
+          const recentFiveNet = recentFiveInst.reduce((sum, row) => sum + row.foreign + row.trust, 0);
+          const recentThreeNet = recentThreeInst.reduce((sum, row) => sum + row.foreign + row.trust, 0);
+          const previousThreeNet = previousThreeInst.reduce((sum, row) => sum + row.foreign + row.trust, 0);
+          const flowAcceleration = recentThreeNet - previousThreeNet;
+          const fiveDayVolume = fiveDayQuotes.reduce((sum, quote) => sum + quote.volume, 0);
+          const averageVolume = fiveDayVolume / fiveDayQuotes.length;
+          const flowRatioPct = fiveDayVolume > 0 ? recentFiveNet / fiveDayVolume * 100 : null;
+          const latestTotal = latest.foreign + latest.trust;
+          const dailyBuys = recentFiveInst.map((row, index) => ({
+            date: days[days.length - 5 + index].date,
+            foreign: row.foreign,
+            trust: row.trust,
+          })).reverse();
+
+          if (latestTotal <= 0) continue;
+          if (recentThreeNet <= 0 || flowAcceleration <= 0) continue;
+          if (averageVolume < 500000) continue;
+          if (!Number.isFinite(flowRatioPct) || flowRatioPct < 0.5) continue;
+
           rows.push({
             code,
             name: latest.name,
             totals: instRows.map((row) => row.total),
             foreigns: instRows.map((row) => row.foreign),
             trusts: instRows.map((row) => row.trust),
-            consecutiveBuyDays,
-            streakForeign,
-            streakTrust,
+            recentFiveNet,
+            recentThreeNet,
+            previousThreeNet,
+            flowAcceleration,
+            flowRatioPct,
             dailyBuys,
             close: latestQuote?.close ?? null,
             priceStatus,
@@ -1985,31 +2018,31 @@
             volumeChangePct: previousQuote && latestQuote
               ? (latestQuote.volume - previousQuote.volume) / previousQuote.volume * 100
               : null,
-            latestTotal: latest.foreign + latest.trust,
+            latestTotal,
           });
         }
 
         const topRows = rows
-          .sort((a, b) => b.consecutiveBuyDays - a.consecutiveBuyDays || b.latestTotal - a.latestTotal)
+          .sort((a, b) => b.flowRatioPct - a.flowRatioPct || b.flowAcceleration - a.flowAcceleration)
           .slice(0, n);
 
         els.instDate.textContent = `${days[0].date}~${latestDate}`;
         els.marginDate.textContent = "--";
         els.instTotal.textContent = String(topRows.length);
         els.instTotal.className = "";
-        els.marginChange.textContent = "外資投信連買";
+        els.marginChange.textContent = "資金轉向未發動";
         els.marginChange.className = "positive";
         els.status.textContent = `完成，符合 ${rows.length} 檔`;
 
         if (!topRows.length) {
-          els.result.innerHTML = `<div class="panel empty">目前無符合條件的強勢股</div>${renderApiDebug()}`;
+          els.result.innerHTML = `<div class="panel empty">目前無符合「資金轉向、股價未發動」條件的股票</div>${renderApiDebug()}`;
           return;
         }
 
         els.result.innerHTML = `
           <article class="compact-list">
             <div class="compact-list-head">
-              <div class="card-sub">排除 ETF，依外資與投信同日連續買超天數排序；股價以最近 5 日判斷，價量狀態不影響入選。</div>
+              <div class="card-sub">排除 ETF；近 5 日法人資金淨流入、最近 3 日資金加速、最新一日仍為買超、法人淨買占成交量至少 0.5%，且股價仍為窄幅整理。依資金集中度排序。</div>
               <span class="badge good">${days[0].date}~${latestDate}</span>
             </div>
             ${topRows.map((row, index) => `
@@ -2017,13 +2050,14 @@
                 <div class="stock-list-rank">#${index + 1}</div>
                 <div class="stock-list-name">
                   <strong>${row.code} ${row.name}</strong>
-                  <span>外資投信連買 ${row.consecutiveBuyDays} 天</span>
+                  <span>近 5 日淨流入 ${signed(row.recentFiveNet / 1000)} 張 · 集中度 ${row.flowRatioPct.toFixed(2)}%</span>
                 </div>
                 <div class="stock-list-metrics">
                   <div class="stock-list-metric stock-list-market price-status"><span>股價狀態（近 5 日）</span><strong class="${row.priceStatus.tone}">${fmtPrice(row.close)} · ${row.priceStatus.label}${Number.isFinite(row.priceStatus.changePct) ? ` ${signedPct(row.priceStatus.changePct)}` : ""}</strong></div>
                   <div class="stock-list-metric stock-list-market volume-status"><span>成交量狀態</span><strong class="${signedClass(row.volumeChangePct)}">${Number.isFinite(row.volume) ? `${fmtNum(row.volume / 1000)} 張 · ` : ""}${row.volumeChangePct > 0 ? `量增 ${signedPct(row.volumeChangePct)}` : row.volumeChangePct < 0 ? `量縮 ${signedPct(row.volumeChangePct)}` : Number.isFinite(row.volumeChangePct) ? "持平" : "無資料"}</strong></div>
+                  <div class="stock-list-metric flow-summary"><span>法人資金方向</span><strong class="positive">近 5 日 ${signed(row.recentFiveNet / 1000)} 張 · 近 3 日加速 ${signed(row.flowAcceleration / 1000)} 張</strong></div>
                   <div class="stock-list-daily">
-                    <div class="stock-list-daily-title">連買期間逐日買超量</div>
+                    <div class="stock-list-daily-title">近 5 日逐日資金方向</div>
                     ${row.dailyBuys.map((day) => `
                       <div class="stock-list-daily-row">
                         <span>${day.date.slice(4, 6)}/${day.date.slice(6, 8)}</span>
@@ -2054,18 +2088,18 @@
       els.refreshAll.textContent = "資料更新中…";
       els.date.value = todayYmd();
       els.rank.value = "10";
-      els.strongResult.innerHTML = `<div class="panel empty">正在更新強勢股排行…</div>`;
+      els.strongResult.innerHTML = `<div class="panel empty">正在更新資金方向排行…</div>`;
 
       try {
         els.result = els.strongResult;
         await showStrongChips();
-        els.status.textContent = `強勢股更新完成 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+        els.status.textContent = `資金方向更新完成 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
       } finally {
         els.result = els.strongResult;
         els.refreshAll.disabled = false;
         els.refreshAll.classList.remove("is-loading");
         els.refreshAll.removeAttribute("aria-busy");
-        els.refreshAll.textContent = "更新強勢股";
+        els.refreshAll.textContent = "更新資金方向";
       }
     }
 

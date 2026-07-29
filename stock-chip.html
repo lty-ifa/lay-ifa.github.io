@@ -1236,16 +1236,49 @@
     }
 
     @media (max-width: 560px) {
-      .result-section { margin-top: 18px; padding: 14px 10px 12px 14px; border-radius: 13px; }
+      .result-section { margin-top: 18px; padding: 12px 8px 10px; border-radius: 13px; }
       .result-section .result-heading { padding: 0 0 11px; }
-      .result-heading { align-items: flex-start; gap: 5px; }
+      .result-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        gap: 4px;
+      }
       .result-title { gap: 7px; line-height: 1.35; }
       .result-title::before { min-width: 30px; height: 24px; }
-      .compact-list-head { align-items: flex-start; flex-direction: column; }
-      .stock-list-row { grid-template-columns: 30px minmax(0, 1fr); gap: 7px; padding: 13px 10px; }
-      .stock-list-metrics { grid-column: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; }
-      .stock-list-metric strong { font-size: 11px; }
-      .stock-list-market { grid-column: 1 / -1; }
+      .result-heading > span { padding-left: 37px; }
+      .compact-list-head {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 11px 12px;
+      }
+      .stock-list-row {
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 8px;
+        padding: 13px 10px;
+      }
+      .stock-list-name strong {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+      }
+      .stock-list-metrics {
+        grid-column: 2;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        width: 100%;
+      }
+      .stock-list-metric strong {
+        font-size: 12px;
+        overflow-wrap: normal;
+        word-break: keep-all;
+      }
+      .stock-list-market {
+        grid-column: auto;
+        width: 100%;
+        min-height: 0;
+        box-sizing: border-box;
+      }
       .dashboard-controls { align-items: stretch; flex-direction: column; }
       .dashboard-controls .refresh-all { width: 100%; }
       .stock-list-daily-row {
@@ -1263,7 +1296,7 @@
       <div class="brand-lockup">
         <h1>台股籌碼雷達</h1>
         <div class="brand-copy">
-          <div class="subline">法人資金 · 方向加速 · 價格未發動</div>
+          <div class="subline">季線突破 · 成交量確認 · EPS／本益比</div>
         </div>
       </div>
       <div class="header-actions">
@@ -1276,44 +1309,20 @@
       <section>
         <div class="panel dashboard-controls">
           <div>
-            <h2>每日籌碼快照</h2>
-            <p>追蹤法人資金集中方向，找出仍在窄幅整理的前 10 名股票。</p>
+            <h2>每日季線掃描</h2>
+            <p>找出成交量超過千張、剛站上季線的股票，並列出 EPS 與本益比。</p>
           </div>
-          <button id="refreshAllButton" class="primary refresh-all">更新資金方向</button>
-        </div>
-
-        <div class="hidden-controls" aria-hidden="true">
-          <button id="queryButton"></button>
-          <button id="strongButton"></button>
-          <div id="modeForm">
-            <div id="modeTitle"></div>
-          <div id="stockField" class="field">
-              <input id="stockInput" value="2330">
-          </div>
-          <div id="fieldsGrid" class="grid-2">
-            <div id="dateField" class="field">
-                <input id="dateInput">
-            </div>
-            <div id="rankField" class="field">
-                <input id="rankInput" type="number" value="10">
-            </div>
-          </div>
-          <button id="executeButton"></button>
-          <span id="instDate"></span>
-          <span id="marginDate"></span>
-          <span id="instTotal"></span>
-          <span id="marginChange"></span>
-        </div>
+          <button id="refreshAllButton" class="primary refresh-all">更新季線突破</button>
         </div>
 
         <div class="panel status" id="statusText">按下更新按鈕，取得最新排行。</div>
 
-        <section class="result-section strong-zone" aria-labelledby="strongResultTitle">
+        <section class="result-section strong-zone" aria-labelledby="maCrossResultTitle">
           <div class="result-heading">
-            <h2 class="result-title" id="strongResultTitle">資金轉向未發動前 10 名</h2>
-            <span>EARLY MONEY FLOW</span>
+            <h2 class="result-title" id="maCrossResultTitle">放量突破季線</h2>
+            <span>MA60 BREAKOUT</span>
           </div>
-          <div id="strongResult"><div class="panel empty">尚未更新</div></div>
+          <div id="maCrossResult"><div class="panel empty">尚未更新</div></div>
         </section>
 
       </section>
@@ -1324,108 +1333,13 @@
   </main>
 
   <script>
-    const INST_API = "https://www.twse.com.tw/rwd/zh/fund/T86";
-    const MARGIN_API = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN";
-    const MARKET_API = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX";
-    const TDCC_PROXY_API = "https://tdcc-shareholding.goodely.workers.dev/api/tdcc-shareholding";
-    const TDCC_SNAPSHOT_KEY = "tdccShareholderSnapshot";
-    let activeMode = "";
-    let lastApiDebug = [];
+    const TRADINGVIEW_SCAN_API = "https://scanner.tradingview.com/taiwan/scan";
 
     const els = {
-      stock: document.getElementById("stockInput"),
-      date: document.getElementById("dateInput"),
-      rank: document.getElementById("rankInput"),
-      query: document.getElementById("queryButton"),
-      strongButton: document.getElementById("strongButton"),
-      modeForm: document.getElementById("modeForm"),
-      modeTitle: document.getElementById("modeTitle"),
-      fieldsGrid: document.getElementById("fieldsGrid"),
-      stockField: document.getElementById("stockField"),
-      dateField: document.getElementById("dateField"),
-      rankField: document.getElementById("rankField"),
-      execute: document.getElementById("executeButton"),
       status: document.getElementById("statusText"),
-      result: document.getElementById("strongResult"),
-      instDate: document.getElementById("instDate"),
-      marginDate: document.getElementById("marginDate"),
-      instTotal: document.getElementById("instTotal"),
-      marginChange: document.getElementById("marginChange"),
       refreshAll: document.getElementById("refreshAllButton"),
-      strongResult: document.getElementById("strongResult"),
+      maCrossResult: document.getElementById("maCrossResult"),
     };
-
-    const modeConfig = {
-      query: {
-        title: "查個股",
-        action: "查詢個股",
-        showStock: true,
-        showRank: false,
-        status: "輸入股票代號與日期後查詢。",
-      },
-      strong: {
-        title: "資金方向",
-        action: "篩選資金方向",
-        showStock: false,
-        showRank: true,
-        status: "選擇日期與顯示筆數後篩選。",
-      },
-    };
-
-    function setActiveMode(mode) {
-      activeMode = mode;
-      const config = modeConfig[mode];
-      if (!config) return;
-      els.modeForm.classList.add("is-open");
-      els.modeTitle.textContent = config.title;
-      els.execute.textContent = config.action;
-      els.stockField.classList.toggle("is-hidden", !config.showStock);
-      els.rankField.classList.toggle("is-hidden", !config.showRank);
-      els.fieldsGrid.classList.toggle("is-single", !config.showRank);
-      els.query.classList.toggle("is-active", mode === "query");
-      els.strongButton.classList.toggle("is-active", mode === "strong");
-      els.status.textContent = config.status;
-      if (config.showStock) {
-        els.stock.focus();
-      } else {
-        els.date.focus();
-      }
-    }
-
-    async function executeActiveMode() {
-      if (activeMode === "query") {
-        await queryStock();
-      } else if (activeMode === "strong") {
-        await showStrongChips();
-      } else {
-        els.status.textContent = "請先選擇功能。";
-      }
-    }
-
-    let lastInst = null;
-    let lastMargin = null;
-
-    function todayYmd() {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}${m}${day}`;
-    }
-
-    function addDays(ymd, delta) {
-      const d = new Date(Number(ymd.slice(0, 4)), Number(ymd.slice(4, 6)) - 1, Number(ymd.slice(6, 8)));
-      d.setDate(d.getDate() + delta);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}${m}${day}`;
-    }
-
-    function toNum(value) {
-      const n = Number(String(value ?? "").replace(/,/g, "").trim());
-      return Number.isFinite(n) ? n : 0;
-    }
 
     function fmtNum(value) {
       if (!Number.isFinite(value)) return "--";
@@ -1442,642 +1356,104 @@
         : "--";
     }
 
-    function signedClass(value) {
-      if (!Number.isFinite(value) || value === 0) return "neutral";
-      return value > 0 ? "positive" : "negative";
-    }
-
-    function signed(value) {
-      if (!Number.isFinite(value)) return "--";
-      return `${value > 0 ? "+" : ""}${fmtNum(value)}`;
-    }
-
-    function signedPct(value) {
-      if (!Number.isFinite(value)) return "--";
-      return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
-    }
-
-    function resetApiDebug() {
-      lastApiDebug = [];
-    }
-
-    function addApiDebug(name, status, detail = "") {
-      lastApiDebug.push({
-        name,
-        status,
-        detail,
-        time: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
-      });
-    }
-
-    function renderApiDebug() {
-      return "";
-    }
-
-    function renderFailure(error) {
-      return `
-        <div class="panel empty">${error?.message || "查詢失敗"}</div>
-        ${renderApiDebug()}
-      `;
-    }
-
-    function sleep(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    function buildUrl(url, params = {}) {
-      const query = new URLSearchParams(params);
-      return query.toString() ? `${url}?${query}` : url;
-    }
-
-    async function fetchTextStable(url, params = {}, options = {}) {
-      const {
-        name = url,
-        retries = 2,
-        timeoutMs = 10000,
-        delayMs = 380,
-        silent = false,
-      } = options;
-      const fullUrl = buildUrl(url, params);
-      let lastError = null;
-
-      for (let attempt = 0; attempt <= retries; attempt += 1) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), timeoutMs);
-        try {
-          const response = await fetch(fullUrl, {
-            cache: "no-store",
-            signal: controller.signal,
-          });
-          clearTimeout(timeout);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          const text = await response.text();
-          if (!silent) addApiDebug(name, "ok", `${response.status} ${fmtNum(text.length)} bytes`);
-          return { text, response };
-        } catch (error) {
-          clearTimeout(timeout);
-          lastError = error;
-          const reason = error?.name === "AbortError" ? `逾時 ${timeoutMs}ms` : error?.message || String(error);
-          if (!silent) addApiDebug(name, attempt < retries ? "skip" : "error", `第 ${attempt + 1} 次 ${reason}`);
-          if (attempt < retries) await sleep(delayMs * (attempt + 1));
-        }
-      }
-
-      throw new Error(`${name} 連線失敗：${lastError?.message || lastError || "未知錯誤"}`);
-    }
-
-    function splitCsvLine(line) {
-      const cells = [];
-      let cell = "";
-      let quoted = false;
-      for (const char of line) {
-        if (char === '"') {
-          quoted = !quoted;
-        } else if (char === "," && !quoted) {
-          cells.push(cell);
-          cell = "";
-        } else {
-          cell += char;
-        }
-      }
-      cells.push(cell);
-      return cells.map((value) => value.trim().replace(/^"|"$/g, ""));
-    }
-
     function isEtfLikeCode(code) {
-      return String(code || "").trim().startsWith("00");
+      return !/^\d{4}$/.test(code) || code.startsWith("00");
     }
 
-    function parseTdccCsv(text) {
-      const lines = String(text || "").replace(/^\uFEFF/, "").split(/\r?\n/).filter(Boolean);
-      const header = splitCsvLine(lines.shift() || "");
-      const idx = Object.fromEntries(header.map((field, index) => [field, index]));
-      const byCode = new Map();
-
-      for (const line of lines) {
-        const row = splitCsvLine(line);
-        const code = String(row[idx["證券代號"]] || "").trim();
-        const level = Number(row[idx["持股分級"]]);
-        if (!code.match(/^\d{4}$/) || !Number.isFinite(level)) continue;
-        const item = byCode.get(code) || {
-          date: String(row[idx["資料日期"]] || "").trim(),
-          code,
-          levels: {},
-        };
-        item.levels[level] = {
-          people: toNum(row[idx["人數"]]),
-          shares: toNum(row[idx["股數"]]),
-          pct: Number(String(row[idx["占集保庫存數比例%"]] || "").trim()),
-        };
-        byCode.set(code, item);
-      }
-
-      return [...byCode.values()].map((item) => {
-        const pct1000 = item.levels[15]?.pct;
-        const pct400 = [12, 13, 14, 15].reduce((sum, level) => {
-          const value = item.levels[level]?.pct;
-          return sum + (Number.isFinite(value) ? value : 0);
-        }, 0);
-        const retail = [1, 2, 3].reduce((sum, level) => {
-          const value = item.levels[level]?.pct;
-          return sum + (Number.isFinite(value) ? value : 0);
-        }, 0);
-        return {
-          ...item,
-          name: item.code,
-          pct1000: Number.isFinite(pct1000) ? pct1000 : null,
-          pct400,
-          retail,
-        };
+    async function fetchMa60Breakouts() {
+      const payload = {
+        filter: [
+          { left: "type", operation: "equal", right: "stock" },
+          { left: "exchange", operation: "in_range", right: ["TWSE", "TPEX"] },
+        ],
+        options: { lang: "zh_TW" },
+        markets: ["taiwan"],
+        symbols: { query: { types: [] }, tickers: [] },
+        columns: [
+          "name",
+          "description",
+          "exchange",
+          "close",
+          "SMA60",
+          "close[1]",
+          "SMA60[1]",
+          "volume",
+          "earnings_per_share_diluted_ttm",
+          "price_earnings_ttm",
+        ],
+        range: [0, 3000],
+      };
+      const response = await fetch(TRADINGVIEW_SCAN_API, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload),
       });
-    }
+      if (!response.ok) throw new Error(`季線掃描暫時無法取得（HTTP ${response.status}）`);
+      const data = await response.json();
+      if (!Array.isArray(data?.data)) throw new Error("季線掃描資料格式異常");
 
-    function normalizeTdccRows(rows) {
-      if (!Array.isArray(rows)) return [];
-      return rows
-        .filter((row) => row && String(row.code || "").match(/^\d{4}$/))
+      const universe = data.data.map(({ d }) => ({
+        code: String(d[0] || "").trim(),
+        name: String(d[1] || "").trim(),
+        exchange: String(d[2] || "").trim(),
+        close: Number(d[3]),
+        ma60: Number(d[4]),
+        previousClose: Number(d[5]),
+        previousMa60: Number(d[6]),
+        volume: Number(d[7]),
+        eps: d[8] == null ? null : Number(d[8]),
+        pe: d[9] == null ? null : Number(d[9]),
+      })).filter((row) => /^\d{4}$/.test(row.code) && !isEtfLikeCode(row.code));
+
+      return universe
+        .filter((row) =>
+          Number.isFinite(row.close)
+          && Number.isFinite(row.ma60)
+          && Number.isFinite(row.previousClose)
+          && Number.isFinite(row.previousMa60)
+          && row.close >= row.ma60 * 1.01
+          && row.previousClose <= row.previousMa60
+          && row.volume > 1000000
+        )
         .map((row) => ({
-          date: String(row.date || "").trim(),
-          code: String(row.code || "").trim(),
-          name: String(row.name || row.code || "").trim(),
-          pct1000: Number.isFinite(Number(row.pct1000)) ? Number(row.pct1000) : null,
-          pct400: Number.isFinite(Number(row.pct400)) ? Number(row.pct400) : null,
-          retail: Number.isFinite(Number(row.retail)) ? Number(row.retail) : null,
-        }))
-        .filter((row) => Number.isFinite(row.pct400));
-    }
-
-    async function fetchTdccShareholders() {
-      const { text, response } = await fetchTextStable(TDCC_PROXY_API, {}, {
-        name: "TDCC Worker API",
-        retries: 2,
-        timeoutMs: 12000,
-      });
-      const contentType = response.headers.get("content-type") || "";
-
-      let rows = [];
-      if (contentType.includes("application/json") || text.trim().startsWith("{") || text.trim().startsWith("[")) {
-        const data = JSON.parse(text);
-        rows = normalizeTdccRows(Array.isArray(data) ? data : data.rows);
-      } else {
-        rows = parseTdccCsv(text);
-      }
-
-      if (!rows.length) {
-        addApiDebug("TDCC Worker API 解析", "error", "0 rows");
-        throw new Error("TDCC Worker API 有回應，但資料解析後是 0 筆，請檢查 Worker 回傳格式。");
-      }
-      addApiDebug("TDCC Worker API 解析", "ok", `${fmtNum(rows.length)} 檔`);
-      return rows;
-    }
-
-    async function preflightBigHolderApis(ymd) {
-      addApiDebug("大戶 API preflight", "skip", "開始檢查 TDCC Worker 與 TWSE 資券");
-      const holderRows = await fetchTdccShareholders();
-      addApiDebug("大戶 API preflight", "ok", `TDCC ${fmtNum(holderRows.length)} 檔`);
-
-      const margin = await fetchWithFallback("margin", ymd);
-      if (margin && margin.rows.length) {
-        addApiDebug("大戶 API preflight", "ok", `TWSE 資券 ${margin.date} ${fmtNum(margin.rows.length)} 筆`);
-      } else {
-        addApiDebug("大戶 API preflight", "skip", "TWSE 資券近 7 天無資料，仍可顯示大戶資料");
-      }
-      return { holderRows, margin };
-    }
-
-    function readTdccSnapshot() {
-      try {
-        const snapshot = JSON.parse(localStorage.getItem(TDCC_SNAPSHOT_KEY) || "null");
-        if (!snapshot || !snapshot.date || !Array.isArray(snapshot.rows)) return null;
-        return snapshot;
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function saveTdccSnapshot(rows) {
-      const date = rows.find((row) => row.date)?.date || "";
-      const compactRows = rows.map((row) => ({
-        code: row.code,
-        pct1000: row.pct1000,
-        pct400: row.pct400,
-        retail: row.retail,
-      }));
-      localStorage.setItem(TDCC_SNAPSHOT_KEY, JSON.stringify({ date, rows: compactRows }));
-    }
-
-    function enrichHolderChanges(rows, snapshot) {
-      const previous = new Map((snapshot?.rows || []).map((row) => [row.code, row]));
-      return rows.map((row) => {
-        const prev = previous.get(row.code);
-        return {
           ...row,
-          previousDate: snapshot?.date || "",
-          delta1000: prev && Number.isFinite(prev.pct1000) && Number.isFinite(row.pct1000) ? row.pct1000 - prev.pct1000 : null,
-          delta400: prev && Number.isFinite(prev.pct400) && Number.isFinite(row.pct400) ? row.pct400 - prev.pct400 : null,
-          deltaRetail: prev && Number.isFinite(prev.retail) && Number.isFinite(row.retail) ? row.retail - prev.retail : null,
-        };
-      });
-    }
-
-    function marginTagsFor(row) {
-      const tags = [];
-      if (!row) return [`<span class="badge">無資券</span>`];
-      if (Number.isFinite(row.offset) && row.offset > 0) tags.push(`<span class="badge good">互抵 ${fmtNum(row.offset)}</span>`);
-      if (Number.isFinite(row.offset) && row.offset === 0) tags.push(`<span class="badge">互抵 0</span>`);
-      if (Number.isFinite(row.marginChange) && row.marginChange !== 0) {
-        tags.push(`<span class="badge ${row.marginChange > 0 ? "" : "good"}">融資${row.marginChange > 0 ? "增" : "減"} ${signed(row.marginChange)}</span>`);
-      }
-      return tags.length ? tags : [`<span class="badge">資券平淡</span>`];
-    }
-
-    async function fetchJson(url, params) {
-      const apiName = url.includes("T86")
-        ? "TWSE 三大法人"
-        : url.includes("MI_MARGN")
-          ? "TWSE 資券"
-          : url.includes("MI_INDEX")
-            ? "TWSE 每日行情"
-          : url;
-      const { text } = await fetchTextStable(url, params, {
-        name: apiName,
-        retries: 2,
-        timeoutMs: 10000,
-      });
-      const data = JSON.parse(text);
-      const stat = data?.stat || data?.rtmessage || "OK";
-      if (stat !== "OK") addApiDebug(apiName, "skip", String(stat));
-      return data;
-    }
-
-    function normalizeInst(data) {
-      if (!data || data.stat !== "OK" || !Array.isArray(data.fields) || !Array.isArray(data.data)) return null;
-      const fields = data.fields;
-      const idx = Object.fromEntries(fields.map((field, i) => [field, i]));
-      const rows = data.data
-        .filter((row) => String(row[idx["證券代號"]] || "").trim().match(/^\d{4}$/))
-        .map((row) => ({
-          code: String(row[idx["證券代號"]]).trim(),
-          name: String(row[idx["證券名稱"]]).trim(),
-          foreign: toNum(row[idx["外陸資買賣超股數(不含外資自營商)"]]),
-          trust: toNum(row[idx["投信買賣超股數"]]),
-          total: toNum(row[idx["三大法人買賣超股數"]]),
-        }));
-      return { date: data.date, rows };
-    }
-
-    function normalizeMargin(data) {
-      if (!data || data.stat !== "OK" || !Array.isArray(data.tables) || data.tables.length < 2) return null;
-      const table = data.tables[1];
-      if (!Array.isArray(table.data)) return null;
-      const rows = table.data
-        .filter((row) => String(row[0] || "").trim().match(/^\d{4}$/))
-        .map((row) => {
-          const marginPrev = toNum(row[5]);
-          const marginNow = toNum(row[6]);
-          const shortPrev = toNum(row[11]);
-          const shortNow = toNum(row[12]);
-          return {
-            code: String(row[0]).trim(),
-            name: String(row[1]).trim(),
-            marginNow,
-            marginChange: marginNow - marginPrev,
-            shortNow,
-            shortChange: shortNow - shortPrev,
-            offset: toNum(row[14]),
-          };
-        });
-      return { date: data.date, rows };
-    }
-
-    function normalizeMarket(data) {
-      if (!data || data.stat !== "OK" || !Array.isArray(data.tables)) return null;
-      const table = data.tables.find((item) =>
-        Array.isArray(item.fields)
-        && item.fields.includes("證券代號")
-        && item.fields.includes("成交股數")
-        && item.fields.includes("收盤價")
-      );
-      if (!table || !Array.isArray(table.data)) return null;
-      const idx = Object.fromEntries(table.fields.map((field, index) => [field, index]));
-      const rows = table.data
-        .filter((row) => String(row[idx["證券代號"]] || "").trim().match(/^\d{4}$/))
-        .map((row) => ({
-          code: String(row[idx["證券代號"]]).trim(),
-          close: toNum(row[idx["收盤價"]]),
-          high: toNum(row[idx["最高價"]]),
-          low: toNum(row[idx["最低價"]]),
-          volume: toNum(row[idx["成交股數"]]),
+          aboveMaPct: (row.close / row.ma60 - 1) * 100,
         }))
-        .filter((row) => row.close > 0 && row.high > 0 && row.low > 0 && row.volume > 0);
-      return { date: data.date, rows };
+        .sort((a, b) => b.volume - a.volume);
     }
 
-    function classifyFiveDayPrice(quotes) {
-      if (quotes.length < 5) return { label: "資料不足", tone: "", changePct: null, rangePct: null };
-      const firstClose = quotes[0].close;
-      const latestClose = quotes[quotes.length - 1].close;
-      const highest = Math.max(...quotes.map((quote) => quote.high));
-      const lowest = Math.min(...quotes.map((quote) => quote.low));
-      const changePct = (latestClose - firstClose) / firstClose * 100;
-      const rangePct = (highest - lowest) / lowest * 100;
-      if (changePct > 2) return { label: "走強", tone: "positive", changePct, rangePct };
-      if (changePct < -2) return { label: "走弱", tone: "negative", changePct, rangePct };
-      if (rangePct <= 5) return { label: "橫盤整理", tone: "", changePct, rangePct };
-      return { label: "寬幅震盪", tone: "", changePct, rangePct };
-    }
-
-    async function fetchMarketDay(date) {
-      const data = await fetchJson(MARKET_API, {
-        response: "json",
-        date,
-        type: "ALLBUT0999",
-      });
-      return normalizeMarket(data);
-    }
-
-    async function fetchWithFallback(kind, ymd) {
-      for (let i = 0; i <= 7; i += 1) {
-        const date = addDays(ymd, -i);
-        try {
-          const data = kind === "inst"
-            ? await fetchJson(INST_API, { response: "json", date, selectType: "ALL" })
-            : await fetchJson(MARGIN_API, { response: "json", date, selectType: "ALL" });
-          const normalized = kind === "inst" ? normalizeInst(data) : normalizeMargin(data);
-          if (normalized && normalized.rows.length) {
-            addApiDebug(kind === "inst" ? "法人 fallback" : "資券 fallback", "ok", `${date} ${fmtNum(normalized.rows.length)} 筆`);
-            return normalized;
-          }
-          addApiDebug(kind === "inst" ? "法人 fallback" : "資券 fallback", "skip", `${date} 無資料`);
-        } catch (error) {
-          addApiDebug(kind === "inst" ? "法人 fallback" : "資券 fallback", "error", `${date} ${error.message || error}`);
-        }
-        await sleep(260);
-      }
-      return null;
-    }
-
-    async function fetchInstitutionalDay(date) {
-      const data = await fetchJson(INST_API, { response: "json", date, selectType: "ALL" });
-      return normalizeInst(data);
-    }
-
-    async function fetchRecentInstitutionalDays(count, endYmd) {
-      const days = [];
-      let date = endYmd;
-      for (let i = 0; i < 60 && days.length < count; i += 1) {
-        try {
-          const normalized = await fetchInstitutionalDay(date);
-          if (normalized && normalized.rows.length) days.push(normalized);
-        } catch (error) {
-          // Skip holidays or unavailable dates.
-        }
-        date = addDays(date, -1);
-        await sleep(260);
-      }
-      return days.reverse();
-    }
-
-    function signalFor(inst, margin) {
-      if (!inst || !margin) return { text: "資料不足，無法判斷", tone: "" };
-      const total = inst.total;
-      const marginChange = margin.marginChange;
-      const shortChange = margin.shortChange;
-      if (total > 0 && marginChange > 0) return { text: "法人買超 + 融資增加 -> 散戶跟進，偏多", tone: "good" };
-      if (total > 0 && shortChange > 0) return { text: "法人買超 + 融券增加 -> 有人放空對賭，留意軋空", tone: "good" };
-      if (total < 0 && marginChange > 0) return { text: "法人賣超 + 融資增加 -> 散戶接刀，偏空警示", tone: "bad" };
-      if (total < 0 && shortChange > 0) return { text: "法人賣超 + 融券增加 -> 多空皆跑，偏空", tone: "bad" };
-      if (total > 0 && marginChange < 0) return { text: "法人買超 + 融資減少 -> 散戶獲利了結，法人獨撐", tone: "good" };
-      if (total < 0 && shortChange < 0) return { text: "法人賣超 + 融券回補 -> 空方獲利了結，可能止跌", tone: "" };
-      return { text: `法人${total > 0 ? "買超" : "賣超"}，融資${marginChange > 0 ? "增加" : "減少"}，融券${shortChange > 0 ? "增加" : "減少"}`, tone: "" };
-    }
-
-    function setMetrics(inst, margin) {
-      els.instDate.textContent = lastInst?.date || "--";
-      els.marginDate.textContent = lastMargin?.date || "--";
-      els.instTotal.textContent = inst ? signed(inst.total) : "--";
-      els.instTotal.className = inst ? signedClass(inst.total) : "";
-      els.marginChange.textContent = margin ? signed(margin.marginChange) : "--";
-      els.marginChange.className = margin ? signedClass(margin.marginChange) : "";
-    }
-
-    function renderStock(inst, margin, code) {
-      const name = inst?.name || margin?.name || code;
-      const signal = signalFor(inst, margin);
-      els.result.innerHTML = `
-        <article class="panel card">
-          <div class="card-head">
-            <div>
-              <div class="card-title">${code} ${name}</div>
-              <div class="card-sub">法人 ${lastInst?.date || "--"} / 資券 ${lastMargin?.date || "--"}</div>
-            </div>
-            <div class="strong-split">
-              <span class="badge ${signal.tone === "bad" ? "bad" : signal.tone === "good" ? "good" : ""}">${inst?.total >= 0 ? "法人買超" : "法人賣超"}</span>
-            </div>
-          </div>
-          <div class="data-grid">
-            <div class="cell"><span>外資</span><strong class="${signedClass(inst?.foreign)}">${inst ? signed(inst.foreign) : "--"}</strong></div>
-            <div class="cell"><span>投信</span><strong class="${signedClass(inst?.trust)}">${inst ? signed(inst.trust) : "--"}</strong></div>
-            <div class="cell"><span>三大法人</span><strong class="${signedClass(inst?.total)}">${inst ? signed(inst.total) : "--"}</strong></div>
-            <div class="cell"><span>融資餘額</span><strong>${margin ? fmtNum(margin.marginNow) : "--"}</strong></div>
-            <div class="cell"><span>融資變化</span><strong class="${signedClass(margin?.marginChange)}">${margin ? signed(margin.marginChange) : "--"}</strong></div>
-            <div class="cell"><span>融券餘額</span><strong>${margin ? fmtNum(margin.shortNow) : "--"}</strong></div>
-            <div class="cell"><span>融券變化</span><strong class="${signedClass(margin?.shortChange)}">${margin ? signed(margin.shortChange) : "--"}</strong></div>
-            <div class="cell"><span>資券互抵</span><strong>${margin ? fmtNum(margin.offset) : "--"}</strong></div>
-          </div>
-        </article>
-        <article class="panel card signal ${signal.tone}">
-          <div class="card-title">訊號判斷</div>
-          <div class="card-sub">${signal.text}</div>
-        </article>
-        ${renderApiDebug()}
-      `;
-    }
-
-    async function ensureData() {
-      const ymd = (els.date.value || todayYmd()).replace(/\D/g, "");
-      els.date.value = ymd;
-      els.status.textContent = "抓取 TWSE 資料中";
-      const [inst, margin] = await Promise.all([
-        fetchWithFallback("inst", ymd),
-        fetchWithFallback("margin", ymd),
-      ]);
-      lastInst = inst;
-      lastMargin = margin;
-      if (!lastInst && !lastMargin) throw new Error("近 7 天查無資料");
-    }
-
-    async function queryStock() {
-      const code = els.stock.value.trim();
-      if (!code.match(/^\d{4}$/)) {
-        els.status.textContent = "請輸入 4 碼股票代號";
-        return;
-      }
-      resetApiDebug();
-      els.query.disabled = true;
-      els.execute.disabled = true;
+    async function showMa60Breakouts() {
+      els.maCrossResult.innerHTML = `<div class="panel empty">正在掃描季線突破與 EPS 資料…</div>`;
       try {
-        await ensureData();
-        const inst = lastInst?.rows.find((row) => row.code === code) || null;
-        const margin = lastMargin?.rows.find((row) => row.code === code) || null;
-        setMetrics(inst, margin);
-        renderStock(inst, margin, code);
-        els.status.textContent = inst || margin ? "完成" : "查無此股票或非上市普通股";
-        localStorage.setItem("stockChipCode", code);
-      } catch (error) {
-        els.status.textContent = error.message || "查詢失敗";
-        els.result.innerHTML = renderFailure(error);
-      } finally {
-        els.query.disabled = false;
-        els.execute.disabled = false;
-      }
-    }
-
-    async function showStrongChips() {
-      resetApiDebug();
-      els.strongButton.disabled = true;
-      els.execute.disabled = true;
-      try {
-        const ymd = (els.date.value || todayYmd()).replace(/\D/g, "");
-        els.date.value = ymd;
-        const n = Math.max(3, Math.min(30, Number(els.rank.value) || 10));
-        const lookbackDays = 14;
-        els.status.textContent = `抓取最近 ${lookbackDays} 個交易日法人資料`;
-
-        const days = await fetchRecentInstitutionalDays(lookbackDays, ymd);
-        if (days.length < 2) throw new Error("無法取得足夠交易日資料");
-
-        const latestDate = days[days.length - 1].date;
-        const marketDates = days.slice(-5).map((day) => day.date);
-        els.status.textContent = "抓取最近 5 個交易日股價與成交量";
-        let marketDays = [];
-        try {
-          marketDays = (await Promise.all(marketDates.map(fetchMarketDay))).filter(Boolean);
-        } catch (error) {
-          addApiDebug("TWSE 每日行情", "skip", "價量資料暫時無法取得，仍照法人連買條件顯示");
-        }
-
-        lastInst = days[days.length - 1];
-
-        const maps = days.map((day) => new Map(day.rows.map((row) => [row.code, row])));
-        const marketMaps = marketDays.map((day) => new Map(day.rows.map((row) => [row.code, row])));
-        const previousMarketMap = marketMaps[marketMaps.length - 2] || new Map();
-        const latestMarketMap = marketMaps[marketMaps.length - 1] || new Map();
-        const rows = [];
-
-        for (const latest of days[days.length - 1].rows) {
-          const code = latest.code;
-          const instRows = maps.map((map) => map.get(code));
-          const previousQuote = previousMarketMap.get(code);
-          const latestQuote = latestMarketMap.get(code);
-          const fiveDayQuotes = marketMaps.map((map) => map.get(code)).filter(Boolean);
-          const priceStatus = classifyFiveDayPrice(fiveDayQuotes);
-          if (isEtfLikeCode(code)) continue;
-          if (!instRows.every(Boolean)) continue;
-          if (fiveDayQuotes.length < 5 || priceStatus.label !== "橫盤整理") continue;
-
-          const recentFiveInst = instRows.slice(-5);
-          const recentThreeInst = instRows.slice(-3);
-          const previousThreeInst = instRows.slice(-6, -3);
-          const recentFiveNet = recentFiveInst.reduce((sum, row) => sum + row.foreign + row.trust, 0);
-          const recentThreeNet = recentThreeInst.reduce((sum, row) => sum + row.foreign + row.trust, 0);
-          const previousThreeNet = previousThreeInst.reduce((sum, row) => sum + row.foreign + row.trust, 0);
-          const flowAcceleration = recentThreeNet - previousThreeNet;
-          const fiveDayVolume = fiveDayQuotes.reduce((sum, quote) => sum + quote.volume, 0);
-          const averageVolume = fiveDayVolume / fiveDayQuotes.length;
-          const flowRatioPct = fiveDayVolume > 0 ? recentFiveNet / fiveDayVolume * 100 : null;
-          const latestTotal = latest.foreign + latest.trust;
-          const dailyBuys = recentFiveInst.map((row, index) => ({
-            date: days[days.length - 5 + index].date,
-            foreign: row.foreign,
-            trust: row.trust,
-          })).reverse();
-
-          if (latestTotal <= 0) continue;
-          if (recentThreeNet <= 0 || flowAcceleration <= 0) continue;
-          if (averageVolume < 500000) continue;
-          if (!Number.isFinite(flowRatioPct) || flowRatioPct < 0.5) continue;
-
-          rows.push({
-            code,
-            name: latest.name,
-            totals: instRows.map((row) => row.total),
-            foreigns: instRows.map((row) => row.foreign),
-            trusts: instRows.map((row) => row.trust),
-            recentFiveNet,
-            recentThreeNet,
-            previousThreeNet,
-            flowAcceleration,
-            flowRatioPct,
-            dailyBuys,
-            close: latestQuote?.close ?? null,
-            priceStatus,
-            volume: latestQuote?.volume ?? null,
-            volumeChangePct: previousQuote && latestQuote
-              ? (latestQuote.volume - previousQuote.volume) / previousQuote.volume * 100
-              : null,
-            latestTotal,
-          });
-        }
-
-        const topRows = rows
-          .sort((a, b) => b.flowRatioPct - a.flowRatioPct || b.flowAcceleration - a.flowAcceleration)
-          .slice(0, n);
-
-        els.instDate.textContent = `${days[0].date}~${latestDate}`;
-        els.marginDate.textContent = "--";
-        els.instTotal.textContent = String(topRows.length);
-        els.instTotal.className = "";
-        els.marginChange.textContent = "資金轉向未發動";
-        els.marginChange.className = "positive";
-        els.status.textContent = `完成，符合 ${rows.length} 檔`;
-
-        if (!topRows.length) {
-          els.result.innerHTML = `<div class="panel empty">目前無符合「資金轉向、股價未發動」條件的股票</div>${renderApiDebug()}`;
+        const rows = await fetchMa60Breakouts();
+        if (!rows.length) {
+          els.maCrossResult.innerHTML = `<div class="panel empty">目前沒有同時符合「剛突破季線 1%」與「成交量超過 1,000 張」的股票</div>`;
           return;
         }
-
-        els.result.innerHTML = `
+        els.maCrossResult.innerHTML = `
           <article class="compact-list">
             <div class="compact-list-head">
-              <div class="card-sub">排除 ETF；近 5 日法人資金淨流入、最近 3 日資金加速、最新一日仍為買超、法人淨買占成交量至少 0.5%，且股價仍為窄幅整理。依資金集中度排序。</div>
-              <span class="badge good">${days[0].date}~${latestDate}</span>
+              <div class="card-sub">今日收盤至少高於 MA60 1%、昨日尚未站上 MA60，且今日成交量超過 1,000 張。EPS 為近四季稀釋每股盈餘，本益比為目前股價除以 EPS。</div>
+              <span class="badge good">${rows.length} 檔符合</span>
             </div>
-            ${topRows.map((row, index) => `
+            ${rows.map((row, index) => `
               <div class="stock-list-row">
                 <div class="stock-list-rank">#${index + 1}</div>
                 <div class="stock-list-name">
                   <strong>${row.code} ${row.name}</strong>
-                  <span>近 5 日淨流入 ${signed(row.recentFiveNet / 1000)} 張 · 集中度 ${row.flowRatioPct.toFixed(2)}%</span>
+                  <span>${row.exchange === "TWSE" ? "上市" : "上櫃"} · 成交量 ${fmtNum(row.volume / 1000)} 張</span>
                 </div>
                 <div class="stock-list-metrics">
-                  <div class="stock-list-metric stock-list-market price-status"><span>股價狀態（近 5 日）</span><strong class="${row.priceStatus.tone}">${fmtPrice(row.close)} · ${row.priceStatus.label}${Number.isFinite(row.priceStatus.changePct) ? ` ${signedPct(row.priceStatus.changePct)}` : ""}</strong></div>
-                  <div class="stock-list-metric stock-list-market volume-status"><span>成交量狀態</span><strong class="${signedClass(row.volumeChangePct)}">${Number.isFinite(row.volume) ? `${fmtNum(row.volume / 1000)} 張 · ` : ""}${row.volumeChangePct > 0 ? `量增 ${signedPct(row.volumeChangePct)}` : row.volumeChangePct < 0 ? `量縮 ${signedPct(row.volumeChangePct)}` : Number.isFinite(row.volumeChangePct) ? "持平" : "無資料"}</strong></div>
-                  <div class="stock-list-metric flow-summary"><span>法人資金方向</span><strong class="positive">近 5 日 ${signed(row.recentFiveNet / 1000)} 張 · 近 3 日加速 ${signed(row.flowAcceleration / 1000)} 張</strong></div>
-                  <div class="stock-list-daily">
-                    <div class="stock-list-daily-title">近 5 日逐日資金方向</div>
-                    ${row.dailyBuys.map((day) => `
-                      <div class="stock-list-daily-row">
-                        <span>${day.date.slice(4, 6)}/${day.date.slice(6, 8)}</span>
-                        <span>外資 <b>${signed(day.foreign / 1000)} 張</b></span>
-                        <span>投信 <b>${signed(day.trust / 1000)} 張</b></span>
-                      </div>
-                    `).join("")}
-                  </div>
+                  <div class="stock-list-metric stock-list-market price-status"><span>股價／季線</span><strong class="positive">${fmtPrice(row.close)}／${fmtPrice(row.ma60)} · 高 ${fmtPct(row.aboveMaPct)}</strong></div>
+                  <div class="stock-list-metric stock-list-market volume-status"><span>EPS／本益比</span><strong>${Number.isFinite(row.eps) ? row.eps.toFixed(2) : "--"} 元／${Number.isFinite(row.pe) && row.pe > 0 ? `${row.pe.toFixed(1)} 倍` : "--"}</strong></div>
                 </div>
               </div>
             `).join("")}
           </article>
-          ${renderApiDebug()}
         `;
       } catch (error) {
-        els.status.textContent = error.message || "查詢失敗";
-        els.result.innerHTML = renderFailure(error);
-      } finally {
-        els.strongButton.disabled = false;
-        els.execute.disabled = false;
+        els.maCrossResult.innerHTML = `<div class="panel empty">${error.message || "季線掃描失敗"}</div>`;
+        throw error;
       }
     }
 
@@ -2086,26 +1462,21 @@
       els.refreshAll.classList.add("is-loading");
       els.refreshAll.setAttribute("aria-busy", "true");
       els.refreshAll.textContent = "資料更新中…";
-      els.date.value = todayYmd();
-      els.rank.value = "10";
-      els.strongResult.innerHTML = `<div class="panel empty">正在更新資金方向排行…</div>`;
+      els.maCrossResult.innerHTML = `<div class="panel empty">正在掃描季線突破…</div>`;
 
       try {
-        els.result = els.strongResult;
-        await showStrongChips();
-        els.status.textContent = `資金方向更新完成 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+        await showMa60Breakouts();
+        els.status.textContent = `季線突破更新完成 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+      } catch (error) {
+        els.status.textContent = error.message || "季線突破更新失敗";
       } finally {
-        els.result = els.strongResult;
         els.refreshAll.disabled = false;
         els.refreshAll.classList.remove("is-loading");
         els.refreshAll.removeAttribute("aria-busy");
-        els.refreshAll.textContent = "更新資金方向";
+        els.refreshAll.textContent = "更新季線突破";
       }
     }
 
-    els.date.value = todayYmd();
-    const saved = localStorage.getItem("stockChipCode");
-    if (saved) els.stock.value = saved;
     els.status.textContent = "按下更新按鈕，取得最新排行。";
     els.refreshAll.addEventListener("click", refreshAllInformation);
   </script>

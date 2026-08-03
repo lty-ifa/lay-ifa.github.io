@@ -1424,6 +1424,17 @@
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
+    function recentWeekdayDates(count) {
+      const dates = [];
+      let date = todayYmd();
+      while (dates.length < count) {
+        const weekday = new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}T12:00:00`).getDay();
+        if (weekday !== 0 && weekday !== 6) dates.push(date);
+        date = addDays(date, -1);
+      }
+      return dates;
+    }
+
     function displayDate(ymd) {
       return /^\d{8}$/.test(ymd) ? `${ymd.slice(4, 6)}/${ymd.slice(6, 8)}` : ymd;
     }
@@ -1456,16 +1467,16 @@
 
     async function fetchRecentInstitutionalDays(count) {
       const days = [];
-      let date = todayYmd();
-      for (let checked = 0; checked < 35 && days.length < count; checked += 1) {
+      const requestDates = recentWeekdayDates(count);
+      for (let index = 0; index < requestDates.length; index += 1) {
+        const date = requestDates[index];
         try {
           const day = await fetchInstitutionalDay(date);
           if (day?.rows.length) days.push(day);
         } catch (error) {
-          // 週末、休市日或當日資料尚未公布時繼續往前找。
+          // 休市日或當日資料尚未公布時，記錄為未取得，不再額外往前搜尋。
         }
-        date = addDays(date, -1);
-        if (days.length < count) await wait(220);
+        if (index < requestDates.length - 1) await wait(220);
       }
       return days.reverse();
     }

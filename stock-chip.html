@@ -1442,7 +1442,7 @@
     function normalizeInstitutional(data) {
       if (!data || data.stat !== "OK" || !Array.isArray(data.fields) || !Array.isArray(data.data)) return null;
       const index = Object.fromEntries(data.fields.map((field, i) => [field, i]));
-      const foreignField = data.fields.find((field) => field.includes("外陸資買賣超股數") && !field.includes("外資自營商"));
+      const foreignField = data.fields.find((field) => field.startsWith("外陸資買賣超股數"));
       const trustField = data.fields.find((field) => field.includes("投信買賣超股數"));
       if (!foreignField || !trustField || index["證券代號"] == null || index["證券名稱"] == null) return null;
       const rows = data.data.map((row) => ({

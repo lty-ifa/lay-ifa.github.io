@@ -1224,6 +1224,35 @@
     .stock-list-daily-row span:first-child { color: #8293a9; }
     .stock-list-daily-row b { color: #5fe6a9; font-weight: 600; }
 
+    #etfChangeResult { display: flow-root; }
+    #etfChangeResult > .compact-list-head { margin-bottom: 16px; }
+    #etfChangeResult > .data-notice { margin-top: 16px; }
+    .etf-change-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+    .etf-change-card { min-width: 0; padding: 18px; box-sizing: border-box; }
+    .etf-change-card h3 { margin: 0 0 12px; font-size: 15px; line-height: 1.4; }
+    .etf-change-card.buy h3 { color: #5fe6a9; }
+    .etf-change-card.sell h3 { color: #ff7f96; }
+    .etf-change-row {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      padding: 11px 0;
+      line-height: 1.4;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .etf-change-row:last-child { border-bottom: 0; }
+    .etf-change-row strong { min-width: 0; overflow-wrap: anywhere; }
+    .etf-change-row b { white-space: nowrap; }
+    .etf-change-card.buy .etf-change-row b { color: #5fe6a9; }
+    .etf-change-card.sell .etf-change-row b { color: #ff7f96; }
+
     @media (max-width: 820px) {
       .stock-list-row {
         grid-template-columns: 34px minmax(0, 1fr);
@@ -1236,6 +1265,16 @@
     }
 
     @media (max-width: 560px) {
+      #etfChangeResult > .compact-list-head { margin-bottom: 12px; }
+      #etfChangeResult > .data-notice { margin-top: 12px; }
+      .etf-change-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .etf-change-card { width: 100%; padding: 14px 12px; }
+      .etf-change-row {
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 5px 8px;
+        padding: 10px 0;
+      }
+      .etf-change-row b { grid-column: 2; justify-self: start; }
       .result-section { margin-top: 18px; padding: 12px 8px 10px; border-radius: 13px; }
       .result-section .result-heading { padding: 0 0 11px; }
       .result-heading {
@@ -1296,7 +1335,7 @@
       <div class="brand-lockup">
         <h1>台股籌碼雷達</h1>
         <div class="brand-copy">
-          <div class="subline">季線突破 · 成交量確認 · EPS／本益比</div>
+          <div class="subline">外資投信 · 連續買超 · 含 ETF</div>
         </div>
       </div>
       <div class="header-actions">
@@ -1309,20 +1348,28 @@
       <section>
         <div class="panel dashboard-controls">
           <div>
-            <h2>每日季線掃描</h2>
-            <p>找出成交量超過千張、剛站上季線的股票，並列出 EPS 與本益比。</p>
+            <h2>每日法人連買掃描</h2>
+            <p>找出外資或投信連續買超的股票與 ETF，最新日買超量超過 500 張，並列出前 15 檔。</p>
           </div>
-          <button id="refreshAllButton" class="primary refresh-all">更新季線突破</button>
+          <button id="refreshAllButton" class="primary refresh-all">更新全部資訊</button>
         </div>
 
         <div class="panel status" id="statusText">按下更新按鈕，取得最新排行。</div>
 
         <section class="result-section strong-zone" aria-labelledby="maCrossResultTitle">
           <div class="result-heading">
-            <h2 class="result-title" id="maCrossResultTitle">放量突破季線</h2>
-            <span>MA60 BREAKOUT</span>
+            <h2 class="result-title" id="maCrossResultTitle">外資投信連買標的</h2>
+            <span>FOREIGN + TRUST BUYING</span>
           </div>
           <div id="maCrossResult"><div class="panel empty">尚未更新</div></div>
+        </section>
+
+        <section class="result-section strong-zone" aria-labelledby="etfChangeTitle">
+          <div class="result-heading">
+            <h2 class="result-title" id="etfChangeTitle">00981A 持股變化</h2>
+            <span>DAILY HOLDING CHANGE</span>
+          </div>
+          <div id="etfChangeResult"><div class="panel empty">尚未更新</div></div>
         </section>
 
       </section>
@@ -1333,12 +1380,15 @@
   </main>
 
   <script>
-    const TRADINGVIEW_SCAN_API = "https://scanner.tradingview.com/taiwan/scan";
+    const INST_API = "https://www.twse.com.tw/rwd/zh/fund/T86";
+    const ETF_CHANGE_SOURCE = "https://r.jina.ai/http://zdsetf.com/etf/00981A";
+    const LOOKBACK_DAYS = 14;
 
     const els = {
       status: document.getElementById("statusText"),
       refreshAll: document.getElementById("refreshAllButton"),
       maCrossResult: document.getElementById("maCrossResult"),
+      etfChangeResult: document.getElementById("etfChangeResult"),
     };
 
     function fmtNum(value) {
@@ -1346,113 +1396,227 @@
       return new Intl.NumberFormat("zh-TW").format(Math.round(value));
     }
 
-    function fmtPct(value) {
-      return Number.isFinite(value) ? `${value.toFixed(2)}%` : "--";
+    function toNum(value) {
+      const normalized = String(value ?? "").replace(/,/g, "").trim();
+      const number = Number(normalized);
+      return Number.isFinite(number) ? number : 0;
     }
 
-    function fmtPrice(value) {
-      return Number.isFinite(value)
-        ? new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 2 }).format(value)
-        : "--";
+    function signedLots(shares) {
+      if (!Number.isFinite(shares)) return "--";
+      const lots = shares / 1000;
+      const prefix = lots > 0 ? "+" : "";
+      return `${prefix}${new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 2 }).format(lots)} 張`;
     }
 
-    function isEtfLikeCode(code) {
-      return !/^\d{4}$/.test(code) || code.startsWith("00");
+    function addDays(ymd, offset) {
+      const date = new Date(`${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}T12:00:00`);
+      date.setDate(date.getDate() + offset);
+      return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
     }
 
-    async function fetchMa60Breakouts() {
-      const payload = {
-        filter: [
-          { left: "type", operation: "equal", right: "stock" },
-          { left: "exchange", operation: "in_range", right: ["TWSE", "TPEX"] },
-        ],
-        options: { lang: "zh_TW" },
-        markets: ["taiwan"],
-        symbols: { query: { types: [] }, tickers: [] },
-        columns: [
-          "name",
-          "description",
-          "exchange",
-          "close",
-          "SMA60",
-          "close[1]",
-          "SMA60[1]",
-          "volume",
-          "earnings_per_share_diluted_ttm",
-          "price_earnings_ttm",
-        ],
-        range: [0, 3000],
-      };
-      const response = await fetch(TRADINGVIEW_SCAN_API, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error(`季線掃描暫時無法取得（HTTP ${response.status}）`);
-      const data = await response.json();
-      if (!Array.isArray(data?.data)) throw new Error("季線掃描資料格式異常");
-
-      const universe = data.data.map(({ d }) => ({
-        code: String(d[0] || "").trim(),
-        name: String(d[1] || "").trim(),
-        exchange: String(d[2] || "").trim(),
-        close: Number(d[3]),
-        ma60: Number(d[4]),
-        previousClose: Number(d[5]),
-        previousMa60: Number(d[6]),
-        volume: Number(d[7]),
-        eps: d[8] == null ? null : Number(d[8]),
-        pe: d[9] == null ? null : Number(d[9]),
-      })).filter((row) => /^\d{4}$/.test(row.code) && !isEtfLikeCode(row.code));
-
-      return universe
-        .filter((row) =>
-          Number.isFinite(row.close)
-          && Number.isFinite(row.ma60)
-          && Number.isFinite(row.previousClose)
-          && Number.isFinite(row.previousMa60)
-          && row.close >= row.ma60 * 1.01
-          && row.previousClose <= row.previousMa60
-          && row.volume > 1000000
-        )
-        .map((row) => ({
-          ...row,
-          aboveMaPct: (row.close / row.ma60 - 1) * 100,
-        }))
-        .sort((a, b) => b.volume - a.volume);
+    function todayYmd() {
+      const now = new Date();
+      return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
     }
 
-    async function showMa60Breakouts() {
-      els.maCrossResult.innerHTML = `<div class="panel empty">正在掃描季線突破與 EPS 資料…</div>`;
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function displayDate(ymd) {
+      return /^\d{8}$/.test(ymd) ? `${ymd.slice(4, 6)}/${ymd.slice(6, 8)}` : ymd;
+    }
+
+    function normalizeInstitutional(data) {
+      if (!data || data.stat !== "OK" || !Array.isArray(data.fields) || !Array.isArray(data.data)) return null;
+      const index = Object.fromEntries(data.fields.map((field, i) => [field, i]));
+      const foreignField = data.fields.find((field) => field.includes("外陸資買賣超股數") && !field.includes("外資自營商"));
+      const trustField = data.fields.find((field) => field.includes("投信買賣超股數"));
+      if (!foreignField || !trustField || index["證券代號"] == null || index["證券名稱"] == null) return null;
+      const rows = data.data.map((row) => ({
+        code: String(row[index["證券代號"]] || "").trim(),
+        name: String(row[index["證券名稱"]] || "").trim(),
+        foreign: toNum(row[index[foreignField]]),
+        trust: toNum(row[index[trustField]]),
+      })).filter((row) => /^(?:\d{4,6}|\d{4,5}[A-Z])$/.test(row.code));
+      return { date: String(data.date || ""), rows };
+    }
+
+    async function fetchInstitutionalDay(date) {
+      const url = new URL(INST_API);
+      url.searchParams.set("response", "json");
+      url.searchParams.set("date", date);
+      // ALLBUT0999 保留股票與 ETF，但排除大量權證資料，降低連續請求被限流的機率。
+      url.searchParams.set("selectType", "ALLBUT0999");
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`法人資料暫時無法取得（HTTP ${response.status}）`);
+      return normalizeInstitutional(await response.json());
+    }
+
+    async function fetchRecentInstitutionalDays(count) {
+      const days = [];
+      let date = todayYmd();
+      for (let checked = 0; checked < 35 && days.length < count; checked += 1) {
+        try {
+          const day = await fetchInstitutionalDay(date);
+          if (day?.rows.length) days.push(day);
+        } catch (error) {
+          // 週末、休市日或當日資料尚未公布時繼續往前找。
+        }
+        date = addDays(date, -1);
+        if (days.length < count) await wait(220);
+      }
+      return days.reverse();
+    }
+
+    function collectStreak(days, maps, code, field) {
+      const streak = [];
+      for (let i = days.length - 1; i >= 0; i -= 1) {
+        const row = maps[i].get(code);
+        if (!row || row[field] <= 0) break;
+        streak.push({ date: days[i].date, shares: row[field] });
+      }
+      return streak;
+    }
+
+    function findConsecutiveBuys(days) {
+      const maps = days.map((day) => new Map(day.rows.map((row) => [row.code, row])));
+      const latestRows = days[days.length - 1]?.rows || [];
+      const results = [];
+      for (const latest of latestRows) {
+        const foreignStreak = collectStreak(days, maps, latest.code, "foreign");
+        const trustStreak = collectStreak(days, maps, latest.code, "trust");
+        if (foreignStreak.length < 2 && trustStreak.length < 2) continue;
+        const latestBuyShares = Math.max(0, latest.foreign) + Math.max(0, latest.trust);
+        if (latestBuyShares <= 500000) continue;
+        results.push({
+          code: latest.code,
+          name: latest.name,
+          foreignStreak,
+          trustStreak,
+          latestBuyShares,
+        });
+      }
+      return results
+        .sort((a, b) => b.latestBuyShares - a.latestBuyShares)
+        .slice(0, 15);
+    }
+
+    async function showConsecutiveBuys() {
+      els.maCrossResult.innerHTML = `<div class="panel empty">正在取得最近 ${LOOKBACK_DAYS} 個交易日法人資料…</div>`;
       try {
-        const rows = await fetchMa60Breakouts();
+        const days = await fetchRecentInstitutionalDays(LOOKBACK_DAYS);
+        if (days.length < 2) throw new Error(`法人資料只取得 ${days.length} 個交易日，請稍後重試`);
+        const rows = findConsecutiveBuys(days);
         if (!rows.length) {
-          els.maCrossResult.innerHTML = `<div class="panel empty">目前沒有同時符合「剛突破季線 1%」與「成交量超過 1,000 張」的股票</div>`;
+          els.maCrossResult.innerHTML = `<div class="panel empty">目前沒有同時符合「外資或投信連買至少 2 天」與「最新日買超超過 500 張」的標的</div>`;
           return;
         }
         els.maCrossResult.innerHTML = `
           <article class="compact-list">
             <div class="compact-list-head">
-              <div class="card-sub">今日收盤至少高於 MA60 1%、昨日尚未站上 MA60，且今日成交量超過 1,000 張。EPS 為近四季稀釋每股盈餘，本益比為目前股價除以 EPS。</div>
-              <span class="badge good">${rows.length} 檔符合</span>
+              <div class="card-sub">含股票與 ETF；外資、投信分開計算，任一方從最新交易日起連買至少 2 天即入選。最新日兩者正買超量合計必須超過 500 張，再依該數量排序取前 15 檔。</div>
+              <span class="badge good">TOP ${rows.length}</span>
             </div>
             ${rows.map((row, index) => `
               <div class="stock-list-row">
                 <div class="stock-list-rank">#${index + 1}</div>
                 <div class="stock-list-name">
                   <strong>${row.code} ${row.name}</strong>
-                  <span>${row.exchange === "TWSE" ? "上市" : "上櫃"} · 成交量 ${fmtNum(row.volume / 1000)} 張</span>
+                  <span>${row.foreignStreak.length >= 2 ? `外資連買 ${row.foreignStreak.length} 天` : ""}${row.foreignStreak.length >= 2 && row.trustStreak.length >= 2 ? " · " : ""}${row.trustStreak.length >= 2 ? `投信連買 ${row.trustStreak.length} 天` : ""}</span>
                 </div>
                 <div class="stock-list-metrics">
-                  <div class="stock-list-metric stock-list-market price-status"><span>股價／季線</span><strong class="positive">${fmtPrice(row.close)}／${fmtPrice(row.ma60)} · 高 ${fmtPct(row.aboveMaPct)}</strong></div>
-                  <div class="stock-list-metric stock-list-market volume-status"><span>EPS／本益比</span><strong>${Number.isFinite(row.eps) ? row.eps.toFixed(2) : "--"} 元／${Number.isFinite(row.pe) && row.pe > 0 ? `${row.pe.toFixed(1)} 倍` : "--"}</strong></div>
+                  <div class="stock-list-metric flow-summary"><span>最新日排序買超量</span><strong class="positive">${signedLots(row.latestBuyShares)}</strong></div>
                 </div>
+                ${row.foreignStreak.length >= 2 ? `
+                  <div class="stock-list-daily">
+                    <div class="stock-list-daily-title">外資連買 ${row.foreignStreak.length} 天</div>
+                    ${row.foreignStreak.map((day) => `
+                      <div class="stock-list-daily-row">
+                        <span>${displayDate(day.date)}</span>
+                        <span>外資 <b>${signedLots(day.shares)}</b></span>
+                        <span></span>
+                      </div>
+                    `).join("")}
+                  </div>
+                ` : ""}
+                ${row.trustStreak.length >= 2 ? `
+                  <div class="stock-list-daily">
+                    <div class="stock-list-daily-title">投信連買 ${row.trustStreak.length} 天</div>
+                    ${row.trustStreak.map((day) => `
+                    <div class="stock-list-daily-row">
+                      <span>${displayDate(day.date)}</span>
+                      <span>投信 <b>${signedLots(day.shares)}</b></span>
+                      <span></span>
+                    </div>
+                  `).join("")}
+                  </div>
+                ` : ""}
               </div>
             `).join("")}
           </article>
         `;
       } catch (error) {
-        els.maCrossResult.innerHTML = `<div class="panel empty">${error.message || "季線掃描失敗"}</div>`;
+        els.maCrossResult.innerHTML = `<div class="panel empty">${error.message || "法人連買掃描失敗"}</div>`;
+        throw error;
+      }
+    }
+
+    function parseEtfHoldingChanges(markdown) {
+      const sectionMatch = markdown.match(/## \u6301\u80a1\u8b8a\u5316\s+([\s\S]*?)(?=\n## )/);
+      if (!sectionMatch) throw new Error("00981A 持股變化資料格式異常");
+      const section = sectionMatch[1];
+      const date = section.match(/(20\d{2}-\d{2}-\d{2})/)?.[1] || "--";
+      const changes = section.split("\n")
+        .filter((line) => /^\|\s*[^-]/.test(line) && !line.includes("代號") && !line.includes("當日股數"))
+        .map((line) => line.split("|").slice(1, -1).map((cell) => cell.trim()))
+        .filter((cells) => cells.length >= 5 && /^\d{4,6}$/.test(cells[0]) && /^[+-]/.test(cells[4]))
+        .map((cells) => ({
+          code: cells[0],
+          name: cells[1],
+          change: cells[4].replace(/\*\*/g, ""),
+          direction: cells[4].startsWith("+") ? "buy" : "sell",
+        }));
+      return { date, changes };
+    }
+
+    function renderEtfChangeGroup(title, tone, rows) {
+      return `
+        <article class="panel etf-change-card ${tone}">
+          <h3>${title} ${rows.length} 檔</h3>
+          ${rows.length ? rows.map((row) => `
+            <div class="etf-change-row">
+              <span>${row.code}</span>
+              <strong>${row.name}</strong>
+              <b>${row.change}</b>
+            </div>
+          `).join("") : `<div class="empty">當日無此類異動</div>`}
+        </article>
+      `;
+    }
+
+    async function showEtfHoldingChanges() {
+      els.etfChangeResult.innerHTML = `<div class="panel empty">正在取得 00981A 最新持股變化…</div>`;
+      try {
+        const response = await fetch(ETF_CHANGE_SOURCE);
+        if (!response.ok) throw new Error(`00981A 持股變化暫時無法取得（HTTP ${response.status}）`);
+        const { date, changes } = parseEtfHoldingChanges(await response.text());
+        const buys = changes.filter((row) => row.direction === "buy");
+        const sells = changes.filter((row) => row.direction === "sell");
+        els.etfChangeResult.innerHTML = `
+          <div class="compact-list-head panel">
+            <div class="card-sub">資料日 ${date}。張數為相鄰兩個持股日的公開持股股數差，可能受基金申購／買回影響，不等於經理人逐筆成交量。</div>
+            <span class="badge good">${changes.length} 檔異動</span>
+          </div>
+          <div class="etf-change-grid">
+            ${renderEtfChangeGroup("買進／增持", "buy", buys)}
+            ${renderEtfChangeGroup("賣出／減持", "sell", sells)}
+          </div>
+          <div class="data-notice">來源：公開持股整理資料 · <a href="https://zdsetf.com/etf/00981A" target="_blank" rel="noopener noreferrer">查看完整資料</a></div>
+        `;
+      } catch (error) {
+        els.etfChangeResult.innerHTML = `<div class="panel empty">${error.message || "00981A 持股變化更新失敗"}<br><a href="https://zdsetf.com/etf/00981A" target="_blank" rel="noopener noreferrer">改至資料頁查看</a></div>`;
         throw error;
       }
     }
@@ -1462,18 +1626,21 @@
       els.refreshAll.classList.add("is-loading");
       els.refreshAll.setAttribute("aria-busy", "true");
       els.refreshAll.textContent = "資料更新中…";
-      els.maCrossResult.innerHTML = `<div class="panel empty">正在掃描季線突破…</div>`;
+      els.maCrossResult.innerHTML = `<div class="panel empty">正在掃描外資投信連買…</div>`;
+      els.etfChangeResult.innerHTML = `<div class="panel empty">正在取得 00981A 持股變化…</div>`;
 
       try {
-        await showMa60Breakouts();
-        els.status.textContent = `季線突破更新完成 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+        const results = await Promise.allSettled([showConsecutiveBuys(), showEtfHoldingChanges()]);
+        if (results.every((result) => result.status === "rejected")) throw results[0].reason;
+        const summary = results.some((result) => result.status === "rejected") ? "部分資料更新失敗" : "全部更新完成";
+        els.status.textContent = `${summary} · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
       } catch (error) {
-        els.status.textContent = error.message || "季線突破更新失敗";
+        els.status.textContent = error.message || "外資投信連買更新失敗";
       } finally {
         els.refreshAll.disabled = false;
         els.refreshAll.classList.remove("is-loading");
         els.refreshAll.removeAttribute("aria-busy");
-        els.refreshAll.textContent = "更新季線突破";
+        els.refreshAll.textContent = "更新全部資訊";
       }
     }
 
